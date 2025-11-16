@@ -28,7 +28,7 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white via-[#F4FCE7]/30 to-white">
       {/* Header */}
       <header className="border-b border-border sticky top-0 z-50 bg-white/80 backdrop-blur-lg">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-5xl">
+        <div className="container mx-auto px-3 sm:px-4 py-3 flex items-center justify-between max-w-5xl">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center shadow-md">
               <LeafIcon className="w-6 h-6 text-white" />
@@ -37,14 +37,14 @@ export default function LandingPage() {
               EcoPromise
             </span>
           </Link>
-          <nav className="flex items-center gap-3">
+          <nav className="flex items-center gap-2 sm:gap-3">
             <Link href="/auth/login">
-              <Button variant="ghost" className="text-[#3A7D44] hover:bg-[#3A7D44]/5 font-semibold">
+              <Button variant="ghost" size="sm" className="text-[#3A7D44] hover:bg-[#3A7D44]/5 font-semibold text-xs sm:text-sm">
                 Log in
               </Button>
             </Link>
             <Link href="/auth/register">
-              <Button className="bg-[#3A7D44] hover:bg-[#3A7D44]/90 text-white font-semibold shadow-md">
+              <Button size="sm" className="bg-[#3A7D44] hover:bg-[#3A7D44]/90 text-white font-semibold shadow-md text-xs sm:text-sm">
                 Sign up
               </Button>
             </Link>
@@ -54,8 +54,8 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <main className="flex-1">
-        <div className="container mx-auto px-4 py-16 max-w-5xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 text-center">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* Left side - Preview feed mockup */}
             <div className="order-2 md:order-1 space-y-4">
               <div className="bg-white border border-border rounded-xl p-4 shadow-lg">
@@ -104,12 +104,7 @@ export default function LandingPage() {
                 <span className="text-sm font-semibold text-[#3A7D44]">Social Impact Platform</span>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold text-balance leading-tight">
-                Share Your{' '}
-                <span className="bg-gradient-to-r from-[#3A7D44] to-[#A8D5BA] bg-clip-text text-transparent">
-                  Green Journey
-                </span>
-              </h1>
+                      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               
               <p className="text-xl text-muted-foreground text-pretty leading-relaxed">
                 Track sustainability commitments, celebrate milestones, and inspire others with every eco-friendly action you take.

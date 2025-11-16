@@ -91,7 +91,7 @@ export default function ProfilePage() {
       <DesktopSidebar />
 
       <div className="md:ml-20 lg:ml-72 relative z-10 transition-all duration-300">
-        <main className="container mx-auto px-4 py-8 pb-20 md:pb-8 max-w-4xl">
+                <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-4xl">
           <div className="space-y-6">
             {/* Profile Header */}
             <div className="bg-gradient-to-br from-[#1a1612]/80 to-[#2a2520]/80 backdrop-blur-xl rounded-2xl p-8 border border-[#3A7D44]/30 shadow-2xl">

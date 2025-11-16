@@ -50,7 +50,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Right side - Sign Up */}
-        <Card className="w-full shadow-xl">
+                <Card className="w-full max-w-md z-10 shadow-2xl border-2 border-[#3A7D44]/20 bg-white/95 backdrop-blur-sm mx-4 sm:mx-0">
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center md:hidden mb-4">
               <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">

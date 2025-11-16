@@ -1,216 +1,325 @@
-import Link from 'next/link'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { LeafIcon } from '@/components/leaf-icon'
-import { ArrowLeft, Calendar, TrendingUp, Award, Plus } from 'lucide-react'
-
-// Mock data
-const mockCommitment = {
-  id: 1,
-  title: 'Use public transport instead of driving',
-  description: 'I commit to taking the bus or train to work instead of driving my car, reducing my carbon footprint and supporting sustainable transportation.',
-  category: 'Transport',
-  frequency: 'Daily',
-  duration: 8,
-  startDate: '2024-01-01',
-  status: 'active',
-  progress: 75,
-  carbonSaved: 45.2,
-  estimatedTotal: 60.0,
-  isPublic: true,
-}
-
-const mockProgressUpdates = [
-  { date: '2024-01-15', count: 5, note: 'Great week!' },
-  { date: '2024-01-08', count: 7, note: 'Stayed consistent' },
-  { date: '2024-01-01', count: 4, note: 'First week done' },
-]
-
-const mockAchievements = [
-  { name: 'Week Warrior', description: 'Maintained commitment for 1 week' },
-  { name: 'Consistency King', description: 'Updated progress 3 times' },
-]
+import { AddProgressDialog } from '@/components/add-progress-dialog'
+import { DesktopSidebar } from '@/components/desktop-sidebar'
+import { ArrowLeft, Calendar, TrendingUp, Award, Plus, Loader2, Leaf, Target, Zap } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { toast } from 'sonner'
 
 export default function CommitmentDetailPage() {
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              <LeafIcon className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">EcoPromise</span>
-          </div>
-          <Link href="/dashboard">
-            <Button variant="ghost" size="icon">
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold">
-                N
-              </div>
-            </Button>
-          </Link>
-        </div>
-      </header>
+  const params = useParams()
+  const router = useRouter()
+  const { data: session, status } = useSession()
+  const [commitment, setCommitment] = useState<any>(null)
+  const [progressUpdates, setProgressUpdates] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [totalCompletions, setTotalCompletions] = useState(0)
+  const [expectedCompletions, setExpectedCompletions] = useState(0)
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="space-y-6">
-          {/* Back Button */}
-          <Link href="/dashboard">
-            <Button variant="ghost" className="gap-2">
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
+    if (status === 'authenticated' && params.id) {
+      loadCommitmentData()
+    }
+  }, [status, params.id, router])
+
+  const loadCommitmentData = async () => {
+    try {
+      setLoading(true)
+      const [commitmentData, progressData] = await Promise.all([
+        apiClient.getCommitmentById(params.id as string),
+        apiClient.getProgressUpdates(params.id as string)
+      ])
+      
+      const commitmentInfo = commitmentData.data || commitmentData
+      setCommitment(commitmentInfo)
+      
+      // Backend returns { status: 'success', data: { progressUpdates: [...] } }
+      const updates = progressData.data?.progressUpdates || progressData.progressUpdates || progressData.data || []
+      const updatesArray = Array.isArray(updates) ? updates : []
+      setProgressUpdates(updatesArray)
+      
+      // Calculate total completions
+      const total = updatesArray.reduce((sum: number, update: any) => {
+        return sum + (parseInt(update.amount) || 1)
+      }, 0)
+      setTotalCompletions(total)
+      
+      // Calculate expected completions
+      const expected = getExpectedCompletions(
+        commitmentInfo.frequency,
+        commitmentInfo.duration,
+        commitmentInfo.createdAt
+      )
+      setExpectedCompletions(expected)
+    } catch (error) {
+      console.error('Failed to load commitment:', error)
+      toast.error('Failed to load commitment details')
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  const getExpectedCompletions = (frequency: string, duration: string, createdAt: string) => {
+    const durationMatch = duration?.match(/(\d+)\s*(day|week|month|year)/i)
+    if (!durationMatch) {
+      return frequency === 'daily' ? 30 : frequency === 'weekly' ? 12 : frequency === 'monthly' ? 3 : 1
+    }
+    
+    const [, amount, unit] = durationMatch
+    const durationNum = parseInt(amount)
+    
+    const frequencyMap: Record<string, number> = {
+      'daily': unit === 'day' ? durationNum : unit === 'week' ? durationNum * 7 : unit === 'month' ? durationNum * 30 : durationNum * 365,
+      'weekly': unit === 'week' ? durationNum : unit === 'month' ? durationNum * 4 : unit === 'year' ? durationNum * 52 : Math.ceil(durationNum / 7),
+      'monthly': unit === 'month' ? durationNum : unit === 'year' ? durationNum * 12 : Math.ceil(durationNum / 30),
+      'once': 1
+    }
+    
+    return frequencyMap[frequency] || 30
+  }
+
+
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#2a2520]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[#3A7D44] mx-auto mb-4" />
+          <p className="text-white">Loading commitment...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!commitment) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#2a2520]">
+        <div className="text-center">
+          <p className="text-white mb-4">Commitment not found</p>
+          <Button onClick={() => router.push('/dashboard')} className="bg-[#3A7D44]">
+            Back to Dashboard
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const carbonSaved = commitment.actualCarbonSaved || 0
+  const estimatedTotal = commitment.estimatedCarbonSavings?.total || 0
+  const carbonPerPeriod = commitment.estimatedCarbonSavings?.perPeriod || 0
+  const progressPercent = expectedCompletions > 0 
+    ? Math.min((totalCompletions / expectedCompletions) * 100, 100)
+    : 0
+
+  return (
+    <div className="min-h-screen bg-[#2a2520] flex">
+      <DesktopSidebar />
+      
+      <div className="flex-1 md:ml-20">
+        <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-5xl">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Back Button */}
+            <Button 
+              variant="ghost" 
+              className="gap-2 text-white hover:text-[#3A7D44] hover:bg-white/10"
+              onClick={() => router.push('/dashboard')}
+            >
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Button>
-          </Link>
 
-          {/* Commitment Header */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-3 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="default">{mockCommitment.status}</Badge>
-                    <Badge variant="outline">{mockCommitment.category}</Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {mockCommitment.frequency}
-                    </span>
+            {/* Commitment Header */}
+            <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className="bg-[#3A7D44] text-[#F4FCE7]">
+                        {commitment.status || 'active'}
+                      </Badge>
+                      <Badge variant="outline" className="text-[#3A7D44] border-[#3A7D44]/30">
+                        {commitment.category || 'other'}
+                      </Badge>
+                      <Badge variant="outline" className="text-[#2a2520]/70 border-[#3A7D44]/20">
+                        {commitment.frequency || 'daily'}
+                      </Badge>
+                    </div>
+                    <h1 className="text-3xl font-bold text-[#2a2520]">
+                      {commitment.text}
+                    </h1>
+                    {commitment.duration && (
+                      <p className="text-sm text-[#2a2520]/60">
+                        Duration: {commitment.duration}
+                      </p>
+                    )}
                   </div>
-                  <h1 className="text-3xl font-bold text-balance">
-                    {mockCommitment.title}
-                  </h1>
-                  <p className="text-muted-foreground text-pretty leading-relaxed">
-                    {mockCommitment.description}
+                  <AddProgressDialog
+                    commitmentTitle={commitment.text}
+                    trigger={
+                      <Button size="lg" className="bg-[#3A7D44] hover:bg-[#3A7D44]/90 text-[#F4FCE7] shrink-0">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Progress
+                      </Button>
+                    }
+                    onSubmit={async (count, note) => {
+                      try {
+                        await apiClient.addProgressUpdate(params.id as string, {
+                          amount: count.toString(),
+                          note: note || 'Progress update',
+                          deltaCarbonSaved: carbonPerPeriod * count
+                        })
+                        toast.success('Progress updated successfully!')
+                        loadCommitmentData()
+                      } catch (error) {
+                        console.error('Failed to add progress:', error)
+                        toast.error('Failed to update progress')
+                      }
+                    }}
+                  />
+                </div>
+              </CardHeader>
+            </Card>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <Card className="bg-[#3A7D44]/10 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-full bg-[#3A7D44]/20">
+                      <Leaf className="h-6 w-6 text-[#3A7D44]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-white/70">Carbon Saved</p>
+                      <p className="text-2xl font-bold text-[#3A7D44]">
+                        {carbonSaved.toFixed(1)} kg
+                      </p>
+                      <p className="text-xs text-white/60">
+                        of {estimatedTotal.toFixed(1)} kg goal
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-full bg-[#3A7D44]/20">
+                      <Target className="h-6 w-6 text-[#3A7D44]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-[#2a2520]/70">Completions</p>
+                      <p className="text-2xl font-bold text-[#3A7D44]">
+                        {totalCompletions} / {expectedCompletions}
+                      </p>
+                      <p className="text-xs text-[#2a2520]/60">
+                        {progressUpdates.length} updates
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-full bg-[#3A7D44]/20">
+                      <Zap className="h-6 w-6 text-[#3A7D44]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-[#2a2520]/70">Progress</p>
+                      <p className="text-2xl font-bold text-[#3A7D44]">{progressPercent.toFixed(0)}%</p>
+                      <p className="text-xs text-[#2a2520]/60">
+                        Started {new Date(commitment.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Progress Section */}
+            <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-[#2a2520] flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-[#3A7D44]" />
+                  Progress Tracking
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[#2a2520]/70 font-medium">Overall Progress</span>
+                    <span className="font-bold text-[#3A7D44]">{progressPercent.toFixed(0)}%</span>
+                  </div>
+                  <Progress value={progressPercent} className="h-3 bg-[#A8D5BA]/30" />
+                  <p className="text-xs text-[#2a2520]/60">
+                    {totalCompletions} of {expectedCompletions} completions • {carbonSaved.toFixed(1)} of {estimatedTotal.toFixed(1)} kg CO₂ saved
                   </p>
                 </div>
-                <Button size="lg" className="shrink-0">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Progress
-                </Button>
-              </div>
-            </CardHeader>
-          </Card>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-full bg-primary/10">
-                    <TrendingUp className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Carbon Saved</p>
-                    <p className="text-2xl font-bold text-primary">
-                      {mockCommitment.carbonSaved} kg
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      of {mockCommitment.estimatedTotal} kg goal
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-full bg-secondary/30">
-                    <Calendar className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Duration</p>
-                    <p className="text-2xl font-bold">{mockCommitment.duration} weeks</p>
-                    <p className="text-xs text-muted-foreground">
-                      Started {mockCommitment.startDate}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-full bg-accent">
-                    <Award className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Progress</p>
-                    <p className="text-2xl font-bold">{mockCommitment.progress}%</p>
-                    <p className="text-xs text-muted-foreground">
-                      {mockProgressUpdates.length} updates
-                    </p>
-                  </div>
+                <div className="space-y-3 pt-4">
+                  <h3 className="font-semibold text-[#2a2520]">Progress Updates</h3>
+                  {progressUpdates.length === 0 ? (
+                    <div className="text-center py-12 border-2 border-dashed border-[#3A7D44]/30 rounded-lg">
+                      <Award className="h-12 w-12 mx-auto mb-3 text-[#3A7D44]/50" />
+                      <p className="text-[#2a2520]/60 font-medium">No progress updates yet</p>
+                      <p className="text-sm text-[#2a2520]/50 mt-1">Add your first update to start tracking!</p>
+                    </div>
+                  ) : (
+                    progressUpdates.map((update: any, index: number) => (
+                      <div
+                        key={update._id || index}
+                        className="flex items-start gap-3 p-4 rounded-lg border-2 border-[#3A7D44]/20 bg-white/50"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-[#3A7D44] mt-2 shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+                            <span className="font-medium text-[#2a2520]">
+                              {new Date(update.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              {update.amount && (
+                                <Badge className="bg-[#3A7D44]/20 text-[#3A7D44] border-[#3A7D44]/30">
+                                  {update.amount}x completed
+                                </Badge>
+                              )}
+                              {update.deltaCarbonSaved > 0 && (
+                                <Badge variant="outline" className="text-[#3A7D44] border-[#3A7D44]/30">
+                                  +{update.deltaCarbonSaved.toFixed(1)} kg CO₂
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          {update.note && (
+                            <p className="text-sm text-[#2a2520]/70">{update.note}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Progress Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Overall Progress</span>
-                  <span className="font-medium">{mockCommitment.progress}%</span>
-                </div>
-                <Progress value={mockCommitment.progress} className="h-3" />
-              </div>
-
-              <div className="space-y-3 pt-4">
-                <h3 className="font-semibold">Progress Updates</h3>
-                {mockProgressUpdates.map((update, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/30"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">{update.date}</span>
-                        <Badge variant="secondary">{update.count}x completed</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{update.note}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Achievements */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Achievements for this Commitment</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {mockAchievements.map((achievement, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card"
-                  >
-                    <div className="p-2 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                      <Award className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{achievement.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {achievement.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

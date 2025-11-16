@@ -31,9 +31,15 @@ app.use(
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      // Check if origin matches allowed origins or is a Vercel deployment
+      const isAllowed = allowedOrigins.includes(origin) || 
+                       origin.endsWith('.vercel.app') ||
+                       origin.includes('trycloudflare.com');
+      
+      if (isAllowed) {
         callback(null, true);
       } else {
+        console.log('❌ CORS blocked origin:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     },

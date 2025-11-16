@@ -85,6 +85,7 @@ export const optionalAuth = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('⚠️ No auth header found in optionalAuth');
       next();
       return;
     }
@@ -92,18 +93,24 @@ export const optionalAuth = async (
     const token = authHeader.substring(7);
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
 
+    console.log('🔐 Verifying JWT token in optionalAuth...');
     const { payload } = await jwtVerify(token, secret);
+    console.log('✅ JWT verified, payload:', { email: payload.email, sub: payload.sub });
 
     if (payload.email) {
       const user = await User.findOne({ email: payload.email as string });
       if (user) {
         req.user = user;
+        console.log('✅ User attached to request:', user.email);
+      } else {
+        console.log('⚠️ User not found in database for email:', payload.email);
       }
     }
 
     next();
   } catch (error) {
     // Continue without auth if token is invalid
+    console.error('⚠️ JWT verification failed in optionalAuth:', error);
     next();
   }
 };

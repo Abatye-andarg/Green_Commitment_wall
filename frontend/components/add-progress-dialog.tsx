@@ -14,12 +14,12 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Leaf, Sparkles } from 'lucide-react'
+import { Leaf, Sparkles, Loader2 } from 'lucide-react'
 
 interface AddProgressDialogProps {
   commitmentTitle: string
   trigger?: React.ReactNode
-  onSubmit?: (count: number, note: string) => void
+  onSubmit?: (count: number, note: string) => void | Promise<void>
 }
 
 export function AddProgressDialog({ 
@@ -30,12 +30,22 @@ export function AddProgressDialog({
   const [open, setOpen] = useState(false)
   const [count, setCount] = useState(1)
   const [note, setNote] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = () => {
-    onSubmit?.(count, note)
-    setOpen(false)
-    setCount(1)
-    setNote('')
+  const handleSubmit = async () => {
+    if (isSubmitting) return
+    
+    try {
+      setIsSubmitting(true)
+      await onSubmit?.(count, note)
+      setOpen(false)
+      setCount(1)
+      setNote('')
+    } catch (error) {
+      console.error('Failed to submit progress:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -52,8 +62,8 @@ export function AddProgressDialog({
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="count">
-              How many times did you achieve this since your last update?
+            <Label htmlFor="count" className="text-sm font-medium">
+              How many times did you complete this commitment?
             </Label>
             <Input
               id="count"
@@ -61,7 +71,11 @@ export function AddProgressDialog({
               min="1"
               value={count}
               onChange={(e) => setCount(parseInt(e.target.value) || 1)}
+              className="text-lg"
             />
+            <p className="text-xs text-muted-foreground">
+              Example: If you took the bus 3 times this week, enter 3
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="note">Note (optional)</Label>
@@ -89,12 +103,28 @@ export function AddProgressDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => setOpen(false)}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
-            <Sparkles className="h-4 w-4 mr-2" />
-            Submit Progress
+          <Button 
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Submit Progress
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

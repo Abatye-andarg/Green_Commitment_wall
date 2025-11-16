@@ -45,7 +45,70 @@ export default function DashboardPage() {
       ])
       
       setUserStats(dashboardData.data?.user || dashboardData.user)
-      setCommitments(commitmentsData.data?.commitments || commitmentsData.commitments || [])
+      
+      // Fetch progress updates for each commitment to calculate actual progress
+      const commitmentsArray = commitmentsData.data?.commitments || commitmentsData.commitments || []
+      const commitmentsWithProgress = await Promise.all(
+        commitmentsArray.map(async (commitment: any) => {
+          try {
+            const progressData = await apiClient.getProgressUpdates(commitment._id)
+            const progressUpdates = progressData.data?.progressUpdates || []
+            
+            // Calculate total completions from progress updates
+            const totalCompletions = progressUpdates.reduce((sum: number, update: any) => {
+              return sum + (parseInt(update.amount) || 1)
+            }, 0)
+            
+            // Calculate expected completions based on frequency and duration
+            const getExpectedCompletions = (frequency: string, duration: string, createdAt: string) => {
+              const durationMatch = duration?.match(/(\d+)\s*(day|week|month|year)/i)
+              if (!durationMatch) {
+                // Default to 30 completions if no duration specified
+                return frequency === 'daily' ? 30 : frequency === 'weekly' ? 12 : frequency === 'monthly' ? 3 : 1
+              }
+              
+              const [, amount, unit] = durationMatch
+              const durationNum = parseInt(amount)
+              
+              // Calculate expected based on frequency
+              const frequencyMap: Record<string, number> = {
+                'daily': unit === 'day' ? durationNum : unit === 'week' ? durationNum * 7 : unit === 'month' ? durationNum * 30 : durationNum * 365,
+                'weekly': unit === 'week' ? durationNum : unit === 'month' ? durationNum * 4 : unit === 'year' ? durationNum * 52 : Math.ceil(durationNum / 7),
+                'monthly': unit === 'month' ? durationNum : unit === 'year' ? durationNum * 12 : Math.ceil(durationNum / 30),
+                'once': 1
+              }
+              
+              return frequencyMap[frequency] || 30
+            }
+            
+            const expectedCompletions = getExpectedCompletions(
+              commitment.frequency, 
+              commitment.duration,
+              commitment.createdAt
+            )
+            
+            // Calculate progress percentage
+            const progressPercent = Math.min((totalCompletions / expectedCompletions) * 100, 100)
+            
+            return {
+              ...commitment,
+              progress: Math.round(progressPercent),
+              progressUpdateCount: progressUpdates.length,
+              totalCompletions,
+              expectedCompletions
+            }
+          } catch (error) {
+            console.error(`Failed to load progress for commitment ${commitment._id}:`, error)
+            return {
+              ...commitment,
+              progress: 0,
+              progressUpdateCount: 0
+            }
+          }
+        })
+      )
+      
+      setCommitments(commitmentsWithProgress)
     } catch (error) {
       console.error('Failed to load dashboard:', error)
     } finally {
@@ -67,6 +130,11 @@ export default function DashboardPage() {
   if (!session) {
     return null
   }
+
+  // Calculate total carbon saved from all commitments
+  const totalCarbonSaved = commitments.reduce((total: number, commitment: any) => {
+    return total + (commitment.actualCarbonSaved || 0)
+  }, 0)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2a2520] via-[#3d3530] to-[#2a2520] relative">
@@ -99,16 +167,16 @@ export default function DashboardPage() {
           <DesktopSidebar />
         </div>
         {/* Main content */}
-        <div className="flex-1 md:ml-20 lg:ml-72 transition-all duration-300">
+        <div className="flex-1 ml-0 md:ml-20 lg:ml-72 transition-all duration-300">
           <div className="p-4">
             <h1 className="text-3xl font-bold text-white mb-4">Dashboard</h1>
             
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
               <KPICard
                 icon={Leaf}
                 label="Total CO₂ Saved"
-                value={`${userStats?.totalCarbonSaved || 0} kg`}
+                value={`${totalCarbonSaved.toFixed(1)} kg`}
                 variant="primary"
               />
               <KPICard
@@ -138,18 +206,28 @@ export default function DashboardPage() {
                 </Button>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {commitments.map((commitment: any) => (
-                  <CommitmentCard
-                    key={commitment._id}
-                    title={commitment.title}
-                    category={commitment.category}
-                    frequency={commitment.frequency}
-                    progress={commitment.progress || 0}
-                    carbonSaved={commitment.carbonSaved || 0}
-                    status={commitment.status}
-                  />
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                {commitments.map((commitment: any) => {
+                  // Use ONLY the raw estimated value from backend - NO calculations
+                  const estimatedCarbonTotal = commitment.estimatedCarbonSavings?.total || 0;
+                  
+                  return (
+                    <CommitmentCard
+                      key={commitment._id}
+                      commitmentId={commitment._id}
+                      title={commitment.text || commitment.title || 'Untitled Commitment'}
+                      category={commitment.category || 'other'}
+                      frequency={commitment.frequency || 'daily'}
+                      progress={commitment.progress || 0}
+                      carbonSaved={estimatedCarbonTotal}
+                      estimatedTotal={estimatedCarbonTotal}
+                      carbonPerPeriod={commitment.estimatedCarbonSavings?.perPeriod || 0}
+                      status={commitment.status || 'active'}
+                      onViewDetails={() => router.push(`/commitments/${commitment._id}`)}
+                      onProgressAdded={loadDashboardData}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -176,7 +254,7 @@ export default function DashboardPage() {
       <Button
         onClick={() => setShowCreateDialog(true)}
         size="lg"
-        className="fixed bottom-20 md:bottom-8 right-8 h-14 w-14 rounded-full shadow-2xl bg-gradient-to-r from-[#3A7D44] to-[#A8D5BA] hover:scale-110 transition-transform z-50"
+        className="fixed bottom-20 md:bottom-8 right-4 sm:right-8 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-2xl bg-gradient-to-r from-[#3A7D44] to-[#A8D5BA] hover:scale-110 transition-transform z-50"
       >
         <Plus className="w-6 h-6" />
       </Button>

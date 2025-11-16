@@ -111,9 +111,8 @@ export default function WallPage() {
         apiClient.getWallFeed(),
         apiClient.getWallStats()
       ])
-      // Backend returns { status: "success", data: [...commitments] }
-      const commitmentsArray = Array.isArray(feedData.data) ? feedData.data : 
-                              Array.isArray(feedData) ? feedData : []
+      // Backend returns { status: "success", data: { commitments: [...], pagination: {...} } }
+      const commitmentsArray = feedData.data?.commitments || feedData.data || []
       setCommitments(commitmentsArray)
       setStats(statsData)
     } catch (error) {
@@ -127,7 +126,7 @@ export default function WallPage() {
 
   const filteredCommitments = commitments.filter(
     (c: any) =>
-      c.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.text?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.userId?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -225,7 +224,7 @@ export default function WallPage() {
         </header>
 
         <main className="container mx-auto px-0 py-0 pb-20 md:pb-8 max-w-2xl">
-          <div className="px-4 py-6 mb-4 bg-gradient-to-r from-[#3A7D44]/20 via-[#A8D5BA]/20 to-[#3A7D44]/20 backdrop-blur-sm border-y border-[#3A7D44]/30">
+          <div className="px-3 sm:px-4 py-4 sm:py-6 mb-3 sm:mb-4 bg-gradient-to-r from-[#3A7D44]/20 via-[#A8D5BA]/20 to-[#3A7D44]/20 backdrop-blur-sm border-y border-[#3A7D44]/30">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center animate-pulse">
                 <TrendingUp className="w-5 h-5 text-white" />
@@ -252,19 +251,28 @@ export default function WallPage() {
 
           {/* Feed */}
           <div className="space-y-0">
-            {filteredCommitments.map((commitment: any) => (
-              <InstagramCommitmentCard
-                key={commitment._id || commitment.id}
-                userName={commitment.userId?.name || commitment.userName || 'Anonymous'}
-                userInitials={commitment.userId?.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2) || commitment.userInitials || 'AN'}
-                commitment={commitment.title || commitment.commitment}
-                category={commitment.category}
-                carbonSaved={commitment.carbonSaved || commitment.estimatedCarbonSavings}
-                likes={commitment.likesCount || commitment.likes || 0}
-                comments={commitment.commentsCount || commitment.comments || 0}
-                timeAgo={commitment.timeAgo || 'Recently'}
-              />
-            ))}
+            {filteredCommitments.map((commitment: any) => {
+              // Extract carbon savings from nested structure
+              const carbonSaved = commitment.actualCarbonSaved || 
+                                 commitment.estimatedCarbonSavings?.total ||
+                                 commitment.estimatedCarbonSavings?.perPeriod ||
+                                 commitment.carbonSaved || 
+                                 0;
+              
+              return (
+                <InstagramCommitmentCard
+                  key={commitment._id || commitment.id}
+                  userName={commitment.userId?.name || commitment.userName || 'Anonymous'}
+                  userInitials={commitment.userId?.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2) || commitment.userInitials || 'AN'}
+                  commitment={commitment.text || commitment.title || commitment.commitment || 'No description'}
+                  category={commitment.category || 'other'}
+                  carbonSaved={carbonSaved}
+                  likes={commitment.likeCount || commitment.likesCount || commitment.likes || 0}
+                  comments={commitment.commentCount || commitment.commentsCount || commitment.comments || 0}
+                  timeAgo={commitment.timeAgo || 'Recently'}
+                />
+              );
+            })}
           </div>
 
           {filteredCommitments.length === 0 && (
