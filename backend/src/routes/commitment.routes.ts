@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { authenticate } from '../middleware/auth';
+import { authenticate, optionalAuth } from '../middleware/auth';
 import { validate } from '../middleware/validator';
 import {
   createCommitment,
@@ -39,6 +39,6 @@ router.post('/:id/comments', authenticate, validate(commentValidation), addComme
 router.get('/:id/comments', getComments);
 
 // User commitments
-router.get('/user/:userId', getUserCommitments);
+router.get('/user/:userId', optionalAuth, getUserCommitments);
 
 export default router;

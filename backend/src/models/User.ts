@@ -94,10 +94,7 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-// Indexes for performance
-UserSchema.index({ email: 1 });
-UserSchema.index({ googleId: 1 });
-UserSchema.index({ username: 1 });
+// Indexes for performance (email, googleId, username already indexed via unique/index in schema)
 UserSchema.index({ totalCarbonSaved: -1 });
 UserSchema.index({ level: -1 });
 

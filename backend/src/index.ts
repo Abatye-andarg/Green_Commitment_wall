@@ -1,6 +1,10 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
+// Load environment variables FIRST before any other imports
+dotenv.config();
+
 import connectDB from './config/database';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
@@ -10,9 +14,6 @@ import wallRoutes from './routes/wall.routes';
 import progressRoutes from './routes/progress.routes';
 import socialRoutes from './routes/social.routes';
 import userRoutes from './routes/user.routes';
-
-// Load environment variables
-dotenv.config();
 
 // Create Express app
 const app: Application = express();
@@ -84,14 +85,24 @@ const startServer = async () => {
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
-  console.error('Uncaught Exception:', error);
-  process.exit(1);
+  console.error('❌ Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
+  // Don't exit in development - just log the error
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason: any) => {
-  console.error('Unhandled Rejection:', reason);
-  process.exit(1);
+  console.error('❌ Unhandled Rejection:', reason);
+  if (reason?.stack) {
+    console.error('Stack:', reason.stack);
+  }
+  // Don't exit in development - just log the error
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
 });
 
 // Start the server

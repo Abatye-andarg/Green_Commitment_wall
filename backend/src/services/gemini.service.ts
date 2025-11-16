@@ -1,7 +1,17 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+// Lazy initialize the Gemini client to ensure env vars are loaded
+let ai: GoogleGenAI | null = null;
+
+function getGeminiClient(): GoogleGenAI {
+  if (!ai) {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY environment variable is not set');
+    }
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+  return ai;
+}
 
 export interface CommitmentInterpretation {
   category: 'transport' | 'energy' | 'food' | 'waste' | 'water' | 'consumption' | 'other';
@@ -44,11 +54,18 @@ Extract:
 
 Return valid JSON format.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+    });
+
+    const responseText = response.text;
 
     // Parse JSON from response
+    if (!responseText) {
+      throw new Error('Empty response from Gemini API');
+    }
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
@@ -103,11 +120,18 @@ Calculate:
 
 Return valid JSON format.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+    });
+
+    const responseText = response.text;
 
     // Parse JSON from response
+    if (!responseText) {
+      return getSimpleCarbonEstimate(interpretation, duration);
+    }
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
@@ -187,11 +211,18 @@ For each milestone provide:
 
 Return valid JSON array format.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+    });
+
+    const responseText = response.text;
 
     // Parse JSON from response
+    if (!responseText) {
+      return getDefaultMilestones();
+    }
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);

@@ -120,11 +120,11 @@ export async function joinChallenge(req: AuthRequest, res: Response): Promise<vo
       throw new AppError('Challenge not found', 404);
     }
 
-    if (challenge.participantIds.includes(req.user._id)) {
+    if (challenge.participantIds.includes(req.user._id as any)) {
       throw new AppError('Already joined this challenge', 400);
     }
 
-    challenge.participantIds.push(req.user._id);
+    challenge.participantIds.push(req.user._id as any);
     await challenge.save();
 
     // Notify challenge creator
@@ -132,7 +132,7 @@ export async function joinChallenge(req: AuthRequest, res: Response): Promise<vo
       await notifyChallenge(
         challenge.createdByUserId,
         `${req.user.name} joined your challenge: ${challenge.title}`,
-        challenge._id.toString()
+        (challenge._id as any).toString()
       );
     }
 
@@ -393,7 +393,7 @@ export async function resolveFlag(req: AuthRequest, res: Response): Promise<void
     }
 
     flag.status = 'resolved';
-    flag.resolvedByUserId = req.user._id;
+    flag.resolvedByUserId = req.user._id as any;
     flag.resolvedAt = new Date();
     await flag.save();
 

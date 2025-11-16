@@ -59,8 +59,7 @@ const OrganizationSchema: Schema = new Schema(
   }
 );
 
-// Indexes
-OrganizationSchema.index({ name: 1 });
+// Indexes (name already indexed via unique in schema)
 OrganizationSchema.index({ totalOrgCarbonSaved: -1 });
 
 export default mongoose.model<IOrganization>('Organization', OrganizationSchema);

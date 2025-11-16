@@ -2,13 +2,21 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import User from '../models/User';
 import { AppError } from '../middleware/errorHandler';
+import mongoose from 'mongoose';
 
 /**
  * Get user profile
  */
 export async function getUserProfile(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const user = await User.findById(req.params.id).select('-__v');
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError('Invalid user ID', 400);
+    }
+
+    const user = await User.findById(id).select('-__v');
 
     if (!user) {
       throw new AppError('User not found', 404);
@@ -20,6 +28,7 @@ export async function getUserProfile(req: AuthRequest, res: Response): Promise<v
     });
   } catch (error) {
     if (error instanceof AppError) throw error;
+    console.error('getUserProfile error:', error);
     throw new AppError('Failed to fetch user profile', 500);
   }
 }

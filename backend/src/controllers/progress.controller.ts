@@ -23,7 +23,7 @@ export async function addProgressUpdate(req: AuthRequest, res: Response): Promis
       throw new AppError('Commitment not found', 404);
     }
 
-    if (commitment.userId.toString() !== req.user._id.toString()) {
+    if (commitment.userId.toString() !== (req.user._id as any).toString()) {
       throw new AppError('Not authorized to update this commitment', 403);
     }
 
@@ -42,7 +42,7 @@ export async function addProgressUpdate(req: AuthRequest, res: Response): Promis
     await commitment.save();
 
     // Update user stats
-    await updateUserStats(req.user._id.toString(), {
+    await updateUserStats((req.user._id as any).toString(), {
       carbonDelta: deltaCarbonSaved || 0,
     });
 
@@ -60,13 +60,13 @@ export async function addProgressUpdate(req: AuthRequest, res: Response): Promis
         milestone.completedAt = new Date();
 
         // Update user completed milestones
-        await updateUserStats(req.user._id.toString(), { milestonesDelta: 1 });
+        await updateUserStats((req.user._id as any).toString(), { milestonesDelta: 1 });
 
         // Notify user
         await notifyMilestone(
-          req.user._id,
+          req.user._id as any,
           milestone.title,
-          commitment._id.toString()
+          (commitment._id as any).toString()
         );
       } else if (milestone.currentValue > 0 && milestone.status === 'pending') {
         milestone.status = 'in_progress';

@@ -7,6 +7,7 @@ import { updateUserStats, awardBadges } from '../services/gamification.service';
 import { notifyLike, notifyComment } from '../services/notification.service';
 import { AppError } from '../middleware/errorHandler';
 import Milestone from '../models/Milestone';
+import mongoose from 'mongoose';
 
 /**
  * Create a new commitment with AI interpretation
@@ -42,10 +43,10 @@ export async function createCommitment(req: AuthRequest, res: Response): Promise
     });
 
     // Update user stats
-    await updateUserStats(req.user._id.toString(), { commitmentsDelta: 1 });
+    await updateUserStats((req.user._id as any).toString(), { commitmentsDelta: 1 });
 
     // Award badges
-    await awardBadges(req.user._id.toString(), 'commitment_created');
+    await awardBadges((req.user._id as any).toString(), 'commitment_created');
 
     // Generate milestones
     const milestoneSuggestions = await suggestMilestones(text, interpretation);
@@ -82,7 +83,11 @@ export async function createCommitment(req: AuthRequest, res: Response): Promise
  */
 export async function getCommitment(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const commitment = await Commitment.findById(req.params.id)
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError('Invalid commitment ID', 400);
+    }
+    const commitment = await Commitment.findById(id)
       .populate('userId', 'name email image username');
 
     if (!commitment) {
@@ -91,7 +96,7 @@ export async function getCommitment(req: AuthRequest, res: Response): Promise<vo
 
     // Check if private and user has access
     if (commitment.visibility === 'private' && 
-        (!req.user || commitment.userId._id.toString() !== req.user._id.toString())) {
+        (!req.user || commitment.userId._id.toString() !== (req.user._id as any).toString())) {
       throw new AppError('Not authorized to view this commitment', 403);
     }
 
@@ -122,7 +127,7 @@ export async function updateCommitment(req: AuthRequest, res: Response): Promise
       throw new AppError('Commitment not found', 404);
     }
 
-    if (!req.user || commitment.userId.toString() !== req.user._id.toString()) {
+    if (!req.user || commitment.userId.toString() !== (req.user._id as any).toString()) {
       throw new AppError('Not authorized to update this commitment', 403);
     }
 
@@ -151,7 +156,7 @@ export async function deleteCommitment(req: AuthRequest, res: Response): Promise
       throw new AppError('Commitment not found', 404);
     }
 
-    if (!req.user || commitment.userId.toString() !== req.user._id.toString()) {
+    if (!req.user || commitment.userId.toString() !== (req.user._id as any).toString()) {
       throw new AppError('Not authorized to delete this commitment', 403);
     }
 
@@ -176,13 +181,17 @@ export async function likeCommitment(req: AuthRequest, res: Response): Promise<v
       throw new AppError('Not authenticated', 401);
     }
 
-    const commitment = await Commitment.findById(req.params.id).populate('userId', 'name');
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError('Invalid commitment ID', 400);
+    }
 
+    const commitment = await Commitment.findById(id);
     if (!commitment) {
       throw new AppError('Commitment not found', 404);
     }
 
-    const userId = req.user._id;
+    const userId = req.user._id as any;
     const isLiked = commitment.likes.includes(userId);
 
     if (isLiked) {
@@ -199,7 +208,7 @@ export async function likeCommitment(req: AuthRequest, res: Response): Promise<v
         await notifyLike(
           commitment.userId._id,
           req.user.name,
-          commitment._id.toString()
+          (commitment._id as any).toString()
         );
       }
     }
@@ -245,12 +254,12 @@ export async function addComment(req: AuthRequest, res: Response): Promise<void>
     await commitment.save();
 
     // Notify commitment owner
-    if (commitment.userId._id.toString() !== req.user._id.toString()) {
+    if (commitment.userId._id.toString() !== (req.user._id as any).toString()) {
       await notifyComment(
         commitment.userId._id,
         req.user.name,
-        commitment._id.toString(),
-        comment._id.toString()
+        (commitment._id as any).toString(),
+        (comment._id as any).toString()
       );
     }
 
@@ -290,8 +299,26 @@ export async function getComments(req: AuthRequest, res: Response): Promise<void
  */
 export async function getUserCommitments(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const { userId } = req.params;
+    let { userId } = req.params;
     const { status } = req.query;
+
+    console.log('getUserCommitments called with userId param:', userId);
+    console.log('Authenticated user:', req.user?._id);
+
+    // If userId is 'me', replace with authenticated user's ID
+    if (userId === 'me') {
+      if (!req.user) {
+        throw new AppError('Authentication required to view your own commitments', 401);
+      }
+      userId = (req.user._id as any).toString();
+      console.log('Converted "me" to user ID:', userId);
+    }
+
+    // If userId matches current user's email, convert to their ID
+    if (req.user && userId === req.user.email) {
+      userId = (req.user._id as any).toString();
+      console.log('Converted email to user ID:', userId);
+    }
 
     const query: any = { userId };
     if (status) {
@@ -299,19 +326,25 @@ export async function getUserCommitments(req: AuthRequest, res: Response): Promi
     }
 
     // If not own profile, only show public
-    if (!req.user || req.user._id.toString() !== userId) {
+    if (!req.user || (req.user._id as any).toString() !== userId) {
       query.visibility = 'public';
     }
+
+    console.log('Query:', query);
 
     const commitments = await Commitment.find(query)
       .populate('userId', 'name email image username')
       .sort({ createdAt: -1 });
+
+    console.log('Found commitments:', commitments.length);
 
     res.json({
       status: 'success',
       data: { commitments },
     });
   } catch (error) {
+    console.error('Error in getUserCommitments:', error);
+    if (error instanceof AppError) throw error;
     throw new AppError('Failed to fetch user commitments', 500);
   }
 }

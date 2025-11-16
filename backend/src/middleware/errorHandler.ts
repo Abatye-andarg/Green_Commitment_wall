@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 
 export interface ApiError extends Error {
   statusCode?: number;
@@ -15,18 +16,50 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ): void => {
-  const statusCode = err.statusCode || 500;
-  const status = err.status || 'error';
+  let error = { ...err };
+  error.message = err.message;
 
-  console.error('Error:', {
+  // Log error for debugging
+  console.error('❌ Error:', {
     message: err.message,
-    statusCode,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    name: err.name,
+    statusCode: err.statusCode,
   });
+
+  // Mongoose bad ObjectId
+  if (err.name === 'CastError' && err instanceof mongoose.Error.CastError) {
+    const message = 'Invalid ID format';
+    error = new AppError(message, 400);
+  }
+
+  // Mongoose duplicate key
+  if ((err as any).code === 11000) {
+    const field = Object.keys((err as any).keyValue || {})[0];
+    const message = `${field} already exists`;
+    error = new AppError(message, 400);
+  }
+
+  // Mongoose validation error
+  if (err.name === 'ValidationError' && err instanceof mongoose.Error.ValidationError) {
+    const errors = Object.values(err.errors).map((e: any) => e.message);
+    const message = errors.join(', ');
+    error = new AppError(message, 400);
+  }
+
+  // JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    error = new AppError('Invalid token', 401);
+  }
+  if (err.name === 'TokenExpiredError') {
+    error = new AppError('Token expired', 401);
+  }
+
+  const statusCode = error.statusCode || (err as any).statusCode || 500;
+  const status = error.status || err.status || 'error';
 
   res.status(statusCode).json({
     status,
-    message: err.message || 'Internal server error',
+    message: error.message || err.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };

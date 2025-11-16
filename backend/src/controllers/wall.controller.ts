@@ -85,7 +85,7 @@ export async function getWallFeed(req: AuthRequest, res: Response): Promise<void
     if (req.user) {
       commitments.forEach((commitment: any) => {
         commitment._doc.isLiked = commitment.likes.some(
-          (id: any) => id.toString() === req.user!._id.toString()
+          (id: any) => id.toString() === (req.user!._id as any).toString()
         );
       });
     }
@@ -183,7 +183,7 @@ export async function getTopContributors(req: AuthRequest, res: Response): Promi
 /**
  * Get wall statistics
  */
-export async function getWallStats(req: AuthRequest, res: Response): Promise<void> {
+export async function getWallStats(_req: AuthRequest, res: Response): Promise<void> {
   try {
     const [
       totalCommitments,
