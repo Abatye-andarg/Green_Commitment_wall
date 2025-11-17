@@ -18,6 +18,7 @@ interface InstagramCommitmentCardProps {
   commitment: string
   category: string
   carbonSaved: number
+  estimatedCarbonTotal?: number
   likes: number
   comments: number
   timeAgo: string
@@ -32,6 +33,7 @@ export function InstagramCommitmentCard({
   commitment,
   category,
   carbonSaved,
+  estimatedCarbonTotal,
   likes: initialLikes,
   comments: initialComments,
   timeAgo,
@@ -143,7 +145,7 @@ export function InstagramCommitmentCard({
             <p className="text-xs text-[#3A7D44]/70">{timeAgo}</p>
           </div>
         </div>
-        <Badge className="text-xs bg-[#3A7D44] text-white border-0 shadow-md">
+        <Badge className="text-xs bg-[#2D9C8B] text-white border-0 shadow-md">
           {category}
         </Badge>
       </div>
@@ -182,12 +184,22 @@ export function InstagramCommitmentCard({
             <div className="h-2 bg-white/20 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-[#A8D5BA] to-[#F4FCE7] rounded-full shadow-lg"
-                style={{ width: `${Math.min((carbonSaved / 200) * 100, 100)}%` }}
+                style={{ 
+                  width: `${
+                    estimatedCarbonTotal && estimatedCarbonTotal > 0
+                      ? Math.min((carbonSaved / estimatedCarbonTotal) * 100, 100)
+                      : Math.min((carbonSaved / 100) * 100, 100)
+                  }%` 
+                }}
               />
             </div>
             <div className="flex justify-between mt-1">
-              <span className="text-[10px] text-[#F4FCE7]/70">Level Progress</span>
-              <span className="text-[10px] text-[#F4FCE7]/70 font-bold">{Math.floor((carbonSaved / 200) * 100)}%</span>
+              <span className="text-[10px] text-[#F4FCE7]/70">Progress</span>
+              <span className="text-[10px] text-[#F4FCE7]/70 font-bold">
+                {estimatedCarbonTotal && estimatedCarbonTotal > 0
+                  ? Math.floor((carbonSaved / estimatedCarbonTotal) * 100)
+                  : Math.floor((carbonSaved / 100) * 100)}%
+              </span>
             </div>
           </div>
         </div>

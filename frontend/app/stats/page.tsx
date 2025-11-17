@@ -137,7 +137,7 @@ export default function StatsPage() {
         <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-7xl pb-24 md:pb-8">
           {/* Overview Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/20">
+            <Card className="bg-[#2D9C8B]/10 border-[#2D9C8B]/20">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
@@ -145,12 +145,12 @@ export default function StatsPage() {
                     <p className="text-3xl font-bold text-[#F4FCE7]">{totalCarbon.toFixed(1)}</p>
                     <p className="text-xs text-[#A8D5BA]/60 mt-1">kg carbon dioxide</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500">
+                  <div className="p-3 rounded-xl bg-[#2D9C8B]">
                     <TrendingUp className="w-5 h-5 text-white" />
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-4">
-                  <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-300 border-0">
+                  <Badge variant="secondary" className="bg-[#2D9C8B]/20 text-[#6FCF97] border-0">
                     +{carbonTrend}%
                   </Badge>
                   <span className="text-xs text-[#A8D5BA]/70">from last month</span>
@@ -158,7 +158,7 @@ export default function StatsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/20">
+            <Card className="bg-[#6FCF97]/10 border-[#6FCF97]/20">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
@@ -166,12 +166,12 @@ export default function StatsPage() {
                     <p className="text-3xl font-bold text-[#F4FCE7]">{totalCommitments}</p>
                     <p className="text-xs text-[#A8D5BA]/60 mt-1">pledges made</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
+                  <div className="p-3 rounded-xl bg-[#6FCF97]">
                     <Target className="w-5 h-5 text-white" />
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-4">
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-0">
+                  <Badge variant="secondary" className="bg-[#6FCF97]/20 text-[#6FCF97] border-0">
                     +{commitmentTrend}
                   </Badge>
                   <span className="text-xs text-[#A8D5BA]/70">this month</span>
@@ -179,7 +179,7 @@ export default function StatsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
+            <Card className="bg-[#FFC857]/10 border-[#FFC857]/20">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
@@ -187,7 +187,7 @@ export default function StatsPage() {
                     <p className="text-3xl font-bold text-[#F4FCE7]">{activeCommitments}</p>
                     <p className="text-xs text-[#A8D5BA]/60 mt-1">in progress</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500">
+                  <div className="p-3 rounded-xl bg-[#FFC857]">
                     <Activity className="w-5 h-5 text-white" />
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function StatsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+            <Card className="bg-[#8C6B4A]/10 border-[#8C6B4A]/20">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
@@ -205,7 +205,7 @@ export default function StatsPage() {
                     <p className="text-3xl font-bold text-[#F4FCE7]">{completedCommitments}</p>
                     <p className="text-xs text-[#A8D5BA]/60 mt-1">finished goals</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
+                  <div className="p-3 rounded-xl bg-[#8C6B4A]">
                     <Award className="w-5 h-5 text-white" />
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export default function StatsPage() {
                       <div key={category} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-lg bg-[#6FCF97] flex items-center justify-center">
                               <Icon className="w-5 h-5 text-white" />
                             </div>
                             <div>
@@ -274,7 +274,7 @@ export default function StatsPage() {
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl bg-gradient-to-r from-[#3A7D44]/10 to-transparent border border-[#3A7D44]/20">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-[#2AA8D1] flex items-center justify-center">
                         <Wind className="w-5 h-5 text-white" />
                       </div>
                       <div>
@@ -287,7 +287,7 @@ export default function StatsPage() {
 
                   <div className="p-4 rounded-xl bg-gradient-to-r from-[#3A7D44]/10 to-transparent border border-[#3A7D44]/20">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-[#74B72E] flex items-center justify-center">
                         <LeafIcon className="w-5 h-5 text-white" />
                       </div>
                       <div>
@@ -300,7 +300,7 @@ export default function StatsPage() {
 
                   <div className="p-4 rounded-xl bg-gradient-to-r from-[#3A7D44]/10 to-transparent border border-[#3A7D44]/20">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-[#5A8F6A] flex items-center justify-center">
                         <Droplets className="w-5 h-5 text-white" />
                       </div>
                       <div>
@@ -335,7 +335,7 @@ export default function StatsPage() {
                       key={commitment._id}
                       className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-[#3A7D44]/10 to-transparent border border-[#3A7D44]/20 hover:border-[#3A7D44]/40 transition-all"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-[#6FCF97] flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -350,7 +350,7 @@ export default function StatsPage() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-bold text-[#3A7D44]">
+                        <p className="text-sm font-bold text-[#2D9C8B]">
                           {(commitment.actualCarbonSaved || commitment.estimatedCarbonSavings?.total || 0).toFixed(1)} kg
                         </p>
                         <p className="text-xs text-[#A8D5BA]/70">CO₂</p>

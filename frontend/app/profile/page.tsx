@@ -111,7 +111,7 @@ export default function ProfilePage() {
                     <p className="text-[#A8D5BA] font-bold">Level {userStats?.level || 1} - {userStats?.title || 'Eco Starter'}</p>
                   </div>
                 </div>
-                <Badge className="text-base px-6 py-2 bg-gradient-to-r from-[#3A7D44] to-[#A8D5BA] text-white border-0 shadow-lg">
+                <Badge className="text-base px-6 py-2 bg-[#E9F7EF] text-[#2D9C8B] border-0 shadow-lg">
                   <Leaf className="h-4 w-4 mr-2" />
                   {userStats?.totalCarbonSaved || 0} kg CO₂ saved
                 </Badge>
@@ -144,20 +144,20 @@ export default function ProfilePage() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-emerald-600/90 to-emerald-800/90 backdrop-blur-sm rounded-xl p-6 text-center shadow-xl border border-emerald-400/30 hover:scale-105 transition-transform">
+              <div className="bg-[#2D9C8B] backdrop-blur-sm rounded-xl p-6 text-center shadow-xl border border-[#2D9C8B]/30 hover:scale-105 transition-transform">
                 <TrendingUp className="h-10 w-10 mx-auto mb-3 text-white" />
                 <p className="text-3xl font-black text-white">{activeCommitments}</p>
-                <p className="text-sm text-emerald-100 font-semibold">Active Commitments</p>
+                <p className="text-sm text-white/90 font-semibold">Active Commitments</p>
               </div>
-              <div className="bg-gradient-to-br from-purple-600/90 to-purple-800/90 backdrop-blur-sm rounded-xl p-6 text-center shadow-xl border border-purple-400/30 hover:scale-105 transition-transform">
+              <div className="bg-[#6FCF97] backdrop-blur-sm rounded-xl p-6 text-center shadow-xl border border-[#6FCF97]/30 hover:scale-105 transition-transform">
                 <Trophy className="h-10 w-10 mx-auto mb-3 text-white" />
                 <p className="text-3xl font-black text-white">{totalBadges}</p>
-                <p className="text-sm text-purple-100 font-semibold">Badges Earned</p>
+                <p className="text-sm text-white/90 font-semibold">Badges Earned</p>
               </div>
-              <div className="bg-gradient-to-br from-amber-500/90 to-amber-700/90 backdrop-blur-sm rounded-xl p-6 text-center shadow-xl border border-amber-400/30 hover:scale-105 transition-transform">
+              <div className="bg-[#FFC857] backdrop-blur-sm rounded-xl p-6 text-center shadow-xl border border-[#FFC857]/30 hover:scale-105 transition-transform">
                 <Zap className="h-10 w-10 mx-auto mb-3 text-white" />
                 <p className="text-3xl font-black text-white">{daysActive}</p>
-                <p className="text-sm text-amber-100 font-semibold">Days Active</p>
+                <p className="text-sm text-white/90 font-semibold">Days Active</p>
               </div>
             </div>
 

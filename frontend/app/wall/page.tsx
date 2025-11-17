@@ -11,7 +11,7 @@ import { CreateCommitmentDialog } from '@/components/create-commitment-dialog'
 import { MobileNav } from '@/components/mobile-nav'
 import { DesktopSidebar } from '@/components/desktop-sidebar'
 import { LeafIcon } from '@/components/leaf-icon'
-import { Search, Plus, TrendingUp, Loader2 } from 'lucide-react'
+import { Search, Plus, Loader2 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 
 // Mock data - Instagram style
@@ -234,18 +234,6 @@ export default function WallPage() {
         </header>
 
         <main className="container mx-auto px-0 py-0 pb-20 md:pb-8 max-w-2xl">
-          <div className="px-3 sm:px-4 py-4 sm:py-6 mb-3 sm:mb-4 bg-gradient-to-r from-[#3A7D44]/20 via-[#A8D5BA]/20 to-[#3A7D44]/20 backdrop-blur-sm border-y border-[#3A7D44]/30">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center animate-pulse">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-bold text-[#F4FCE7] text-sm">Trending Now</p>
-                <p className="text-xs text-[#A8D5BA]">2,847 people saved 15.2 tons of CO₂ today</p>
-              </div>
-            </div>
-          </div>
-
           {/* Mobile search */}
           <div className="px-4 py-4 md:hidden bg-[#2a2520]/80 backdrop-blur-sm sticky top-[57px] z-40 border-b border-[#3A7D44]/20">
             <div className="relative">
@@ -269,6 +257,9 @@ export default function WallPage() {
                                  commitment.carbonSaved || 
                                  0;
               
+              // Get estimated carbon total for progress calculation
+              const estimatedCarbonTotal = commitment.estimatedCarbonSavings?.total || 0;
+              
               // Check if current user liked this commitment
               const isLiked = commitment.likes?.includes(session?.user?.id) || false
               
@@ -281,6 +272,7 @@ export default function WallPage() {
                   commitment={commitment.text || commitment.title || commitment.commitment || 'No description'}
                   category={commitment.category || 'other'}
                   carbonSaved={carbonSaved}
+                  estimatedCarbonTotal={estimatedCarbonTotal}
                   likes={commitment.likeCount || commitment.likesCount || commitment.likes?.length || 0}
                   comments={commitment.commentCount || commitment.commentsCount || commitment.comments || 0}
                   timeAgo={commitment.timeAgo || new Date(commitment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) || 'Recently'}

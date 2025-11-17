@@ -168,9 +168,10 @@ export default function CommitmentDetailPage() {
         <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-5xl">
           <div className="space-y-4 sm:space-y-6">
             {/* Back Button */}
-            <Button 
+                        <Button 
               variant="ghost" 
-              className="gap-2 text-white hover:text-[#3A7D44] hover:bg-white/10"
+              size="sm" 
+              className="gap-2 text-white hover:text-[#2D9C8B] hover:bg-white/10"
               onClick={handleBackNavigation}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -178,15 +179,15 @@ export default function CommitmentDetailPage() {
             </Button>
 
             {/* Commitment Header */}
-            <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+            <Card className="bg-[#F4FCE7]/95 border-2 border-[#2D9C8B]/30 backdrop-blur-sm">
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-3 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge className="bg-[#3A7D44] text-[#F4FCE7]">
+                      <Badge className="bg-[#2D9C8B] text-[#F4FCE7]">
                         {commitment.status || 'active'}
                       </Badge>
-                      <Badge variant="outline" className="text-[#3A7D44] border-[#3A7D44]/30">
+                      <Badge variant="outline" className="text-[#2D9C8B] border-[#2D9C8B]/30">
                         {commitment.category || 'other'}
                       </Badge>
                       <Badge variant="outline" className="text-[#2a2520]/70 border-[#3A7D44]/20">
@@ -230,16 +231,16 @@ export default function CommitmentDetailPage() {
             </Card>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              <Card className="bg-[#3A7D44]/10 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-[#F4FCE7]/95 border-2 border-[#2D9C8B]/30 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-full bg-[#3A7D44]/20">
-                      <Leaf className="h-6 w-6 text-[#3A7D44]" />
+                    <div className="p-3 rounded-full bg-[#2D9C8B]/20">
+                      <Leaf className="h-6 w-6 text-[#2D9C8B]" />
                     </div>
                     <div>
                       <p className="text-sm text-white/70">Carbon Saved</p>
-                      <p className="text-2xl font-bold text-[#3A7D44]">
+                      <p className="text-2xl font-bold text-[#2D9C8B]">
                         {carbonSaved.toFixed(1)} kg
                       </p>
                       <p className="text-xs text-white/60">
@@ -250,15 +251,15 @@ export default function CommitmentDetailPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+              <Card className="bg-[#F4FCE7]/95 border-2 border-[#2D9C8B]/30 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-full bg-[#3A7D44]/20">
-                      <Target className="h-6 w-6 text-[#3A7D44]" />
+                    <div className="p-3 rounded-full bg-[#2D9C8B]/20">
+                      <Target className="h-6 w-6 text-[#2D9C8B]" />
                     </div>
                     <div>
                       <p className="text-sm text-[#2a2520]/70">Completions</p>
-                      <p className="text-2xl font-bold text-[#3A7D44]">
+                      <p className="text-2xl font-bold text-[#2D9C8B]">
                         {totalCompletions} / {expectedCompletions}
                       </p>
                       <p className="text-xs text-[#2a2520]/60">
@@ -269,15 +270,15 @@ export default function CommitmentDetailPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+              <Card className="bg-[#F4FCE7]/95 border-2 border-[#2D9C8B]/30 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-full bg-[#3A7D44]/20">
-                      <Zap className="h-6 w-6 text-[#3A7D44]" />
+                    <div className="p-3 rounded-full bg-[#2D9C8B]/20">
+                      <Zap className="h-6 w-6 text-[#2D9C8B]" />
                     </div>
                     <div>
                       <p className="text-sm text-[#2a2520]/70">Progress</p>
-                      <p className="text-2xl font-bold text-[#3A7D44]">{progressPercent.toFixed(0)}%</p>
+                      <p className="text-2xl font-bold text-[#2D9C8B]">{progressPercent.toFixed(0)}%</p>
                       <p className="text-xs text-[#2a2520]/60">
                         Started {new Date(commitment.createdAt).toLocaleDateString()}
                       </p>
@@ -289,10 +290,10 @@ export default function CommitmentDetailPage() {
 
             {/* Milestone Path */}
             {milestones.length > 0 && (
-              <Card className="bg-linear-to-br from-[#3A7D44]/10 to-[#A8D5BA]/10 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+              <Card className="bg-linear-to-br from-[#2D9C8B]/10 to-[#6FCF97]/10 border-2 border-[#2D9C8B]/30 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-[#2a2520] flex items-center gap-2">
-                    <Flag className="h-5 w-5 text-[#3A7D44]" />
+                    <Flag className="h-5 w-5 text-[#2D9C8B]" />
                     Your Journey Path
                   </CardTitle>
                   <p className="text-sm text-[#2a2520]/60">
@@ -302,7 +303,7 @@ export default function CommitmentDetailPage() {
                 <CardContent>
                   <div className="relative">
                     {/* Progress Line */}
-                    <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#3A7D44]/20" />
+                    <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#2D9C8B]/20" />
                     
                     {/* Milestones */}
                     <div className="space-y-8">
@@ -319,17 +320,17 @@ export default function CommitmentDetailPage() {
                             {/* Milestone Icon */}
                             <div className={`relative z-10 shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                               isCompleted 
-                                ? 'bg-[#3A7D44] shadow-lg shadow-[#3A7D44]/50' 
+                                ? 'bg-[#2D9C8B] shadow-lg shadow-[#2D9C8B]/50' 
                                 : isInProgress
-                                ? 'bg-[#A8D5BA] border-2 border-[#3A7D44] animate-pulse'
-                                : 'bg-white border-2 border-[#3A7D44]/30'
+                                ? 'bg-[#6FCF97] border-2 border-[#2D9C8B] animate-pulse'
+                                : 'bg-white border-2 border-[#2D9C8B]/30'
                             }`}>
                               {isCompleted ? (
                                 <CheckCircle2 className="h-6 w-6 text-white" />
                               ) : isInProgress ? (
-                                <Circle className="h-6 w-6 text-[#3A7D44] fill-[#3A7D44]" />
+                                <Circle className="h-6 w-6 text-[#2D9C8B] fill-[#2D9C8B]" />
                               ) : (
-                                <Circle className="h-6 w-6 text-[#3A7D44]/30" />
+                                <Circle className="h-6 w-6 text-[#2D9C8B]/30" />
                               )}
                             </div>
 
@@ -337,15 +338,15 @@ export default function CommitmentDetailPage() {
                             <div className={`flex-1 pb-8 ${isCompleted ? 'opacity-75' : ''}`}>
                               <div className={`rounded-lg p-4 transition-all duration-300 ${
                                 isCompleted
-                                  ? 'bg-[#3A7D44]/10 border-2 border-[#3A7D44]/30'
+                                  ? 'bg-[#2D9C8B]/10 border-2 border-[#2D9C8B]/30'
                                   : isInProgress
-                                  ? 'bg-[#F4FCE7] border-2 border-[#3A7D44] shadow-md'
-                                  : 'bg-white/50 border-2 border-[#3A7D44]/20'
+                                  ? 'bg-[#F4FCE7] border-2 border-[#2D9C8B] shadow-md'
+                                  : 'bg-white/50 border-2 border-[#2D9C8B]/20'
                               }`}>
                                 <div className="flex items-start justify-between gap-3 mb-2">
                                   <div className="flex-1">
                                     <h3 className={`font-semibold mb-1 ${
-                                      isCompleted ? 'text-[#3A7D44] line-through' : 'text-[#2a2520]'
+                                      isCompleted ? 'text-[#2D9C8B] line-through' : 'text-[#2a2520]'
                                     }`}>
                                       {milestone.title}
                                     </h3>
@@ -355,17 +356,17 @@ export default function CommitmentDetailPage() {
                                   </div>
                                   <div className="flex flex-col items-end gap-1">
                                     {isCompleted && milestone.completedAt && (
-                                      <Badge className="bg-[#3A7D44] text-white">
+                                      <Badge className="bg-[#2D9C8B] text-white">
                                         Completed
                                       </Badge>
                                     )}
                                     {isInProgress && (
-                                      <Badge className="bg-[#A8D5BA] text-[#2a2520]">
+                                      <Badge className="bg-[#6FCF97] text-[#2a2520]">
                                         In Progress
                                       </Badge>
                                     )}
                                     {isPending && (
-                                      <Badge variant="outline" className="border-[#3A7D44]/30 text-[#2a2520]/60">
+                                      <Badge variant="outline" className="border-[#2D9C8B]/30 text-[#2a2520]/60">
                                         Pending
                                       </Badge>
                                     )}
@@ -379,20 +380,20 @@ export default function CommitmentDetailPage() {
                                       <span className="text-[#2a2520]/60">
                                         {milestone.currentValue} / {milestone.targetValue} completions
                                       </span>
-                                      <span className="font-semibold text-[#3A7D44]">
+                                      <span className="font-semibold text-[#2D9C8B]">
                                         {progress.toFixed(0)}%
                                       </span>
                                     </div>
                                     <Progress 
                                       value={progress} 
-                                      className="h-2 bg-[#3A7D44]/10"
+                                      className="h-2 bg-[#2D9C8B]/10"
                                     />
                                   </div>
                                 )}
 
                                 {/* Carbon Impact */}
                                 {milestone.estimatedCarbonSavings > 0 && (
-                                  <div className="mt-2 flex items-center gap-2 text-xs text-[#3A7D44]">
+                                  <div className="mt-2 flex items-center gap-2 text-xs text-[#2D9C8B]">
                                     <Leaf className="h-3 w-3" />
                                     <span>
                                       {isCompleted ? 'Saved' : 'Will save'} ~{milestone.estimatedCarbonSavings.toFixed(1)} kg CO₂
@@ -421,10 +422,10 @@ export default function CommitmentDetailPage() {
             )}
 
             {/* Progress Section */}
-            <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+            <Card className="bg-[#F4FCE7]/95 border-2 border-[#2D9C8B]/30 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-[#2a2520] flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-[#3A7D44]" />
+                  <TrendingUp className="h-5 w-5 text-[#2D9C8B]" />
                   Progress Tracking
                 </CardTitle>
               </CardHeader>
@@ -432,9 +433,9 @@ export default function CommitmentDetailPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-[#2a2520]/70 font-medium">Overall Progress</span>
-                    <span className="font-bold text-[#3A7D44]">{progressPercent.toFixed(0)}%</span>
+                    <span className="font-bold text-[#2D9C8B]">{progressPercent.toFixed(0)}%</span>
                   </div>
-                  <Progress value={progressPercent} className="h-3 bg-[#A8D5BA]/30" />
+                  <Progress value={progressPercent} className="h-3 bg-[#6FCF97]/30" />
                   <p className="text-xs text-[#2a2520]/60">
                     {totalCompletions} of {expectedCompletions} completions • {carbonSaved.toFixed(1)} of {estimatedTotal.toFixed(1)} kg CO₂ saved
                   </p>
@@ -466,12 +467,12 @@ export default function CommitmentDetailPage() {
                             </span>
                             <div className="flex items-center gap-2">
                               {update.amount && (
-                                <Badge className="bg-[#3A7D44]/20 text-[#3A7D44] border-[#3A7D44]/30">
+                                <Badge className="bg-[#2D9C8B]/20 text-[#2D9C8B] border-[#2D9C8B]/30">
                                   {update.amount}x completed
                                 </Badge>
                               )}
                               {update.deltaCarbonSaved > 0 && (
-                                <Badge variant="outline" className="text-[#3A7D44] border-[#3A7D44]/30">
+                                <Badge variant="outline" className="text-[#2D9C8B] border-[#2D9C8B]/30">
                                   +{update.deltaCarbonSaved.toFixed(1)} kg CO₂
                                 </Badge>
                               )}

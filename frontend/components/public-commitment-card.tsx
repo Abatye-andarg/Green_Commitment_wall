@@ -36,15 +36,15 @@ export function PublicCommitmentCard({
       >
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-[#3A7D44]/40 shadow-md">
-              <AvatarFallback className="bg-[#A8D5BA] text-[#2a2520] font-bold">
+            <Avatar className="h-10 w-10 border-2 border-[#2D9C8B]/40 shadow-md">
+              <AvatarFallback className="bg-[#6FCF97] text-[#2a2520] font-bold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="font-bold truncate text-[#2a2520]">{userName}</p>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-xs bg-[#3A7D44]/10 text-[#3A7D44] border-[#3A7D44]/30">
+                <Badge variant="outline" className="text-xs bg-[#2D9C8B]/10 text-[#2D9C8B] border-[#2D9C8B]/30">
                   {category}
                 </Badge>
                 <span className="text-xs text-[#2a2520]/60 font-medium">{frequency}</span>
@@ -52,18 +52,15 @@ export function PublicCommitmentCard({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+                <CardContent className="space-y-3">
           <p className="text-sm leading-relaxed line-clamp-3 text-[#2a2520]/90 font-medium">{commitment}</p>
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-[#3A7D44]/10 border border-[#3A7D44]/20">
-            <div className="p-2 rounded-full bg-[#3A7D44]/20">
-              <Leaf className="h-4 w-4 text-[#3A7D44]" />
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-[#2D9C8B]/10 border border-[#2D9C8B]/20">
+            <div className="p-2 rounded-full bg-[#2D9C8B]/20">
+              <Leaf className="h-4 w-4 text-[#2D9C8B]" />
             </div>
             <div>
-              <p className="text-xs text-[#2a2520]/60 font-medium">Impact</p>
-              <p className="font-bold text-[#3A7D44] text-lg">{carbonSaved} kg CO₂</p>
-            </div>
-          </div>
-        </CardContent>
+              <p className="text-xs text-[#2a2520]/60 font-medium">Carbon Impact</p>
+              <p className="font-bold text-[#2D9C8B]">
       </Card>
     </div>
   )
