@@ -6,6 +6,7 @@ import Organization from '../models/Organization';
 import Flag from '../models/Flag';
 import Commitment from '../models/Commitment';
 import Comment from '../models/Comment';
+import User from '../models/User';
 import { AppError } from '../middleware/errorHandler';
 import { notifyChallenge } from '../services/notification.service';
 
@@ -315,7 +316,7 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
     
     if (memberUserIds.length === 0) {
       // Return empty report if no members
-      return res.json({
+      res.json({
         status: 'success',
         data: {
           organization,
@@ -331,6 +332,7 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
           categoryBreakdown: [],
         },
       });
+      return;
     }
 
     // Build date filter
