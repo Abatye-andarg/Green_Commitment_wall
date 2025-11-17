@@ -1,15 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { LeafIcon } from '@/components/leaf-icon'
-import { Building2, User, ArrowLeft } from 'lucide-react'
+import { Building2, User, ArrowLeft, Loader2 } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
@@ -235,5 +235,19 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#2a2520] via-[#3d3530] to-[#2a2520]">
+          <Loader2 className="w-8 h-8 animate-spin text-[#A8D5BA]" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   )
 }
