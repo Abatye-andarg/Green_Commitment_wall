@@ -44,6 +44,7 @@ export default function RegisterOrganizationPage() {
     setLoading(true)
 
     try {
+      console.log('Creating organization with data:', formData)
       const response = await apiClient.createOrganization({
         name: formData.name,
         type: formData.type,
@@ -53,14 +54,17 @@ export default function RegisterOrganizationPage() {
         },
       })
 
+      console.log('Organization created successfully:', response)
       toast.success('Organization created successfully!')
       
       // Redirect to organization dashboard
       const orgId = response.data.organization._id
+      console.log('Redirecting to org dashboard:', orgId)
       router.push(`/org/${orgId}/dashboard`)
     } catch (error: any) {
       console.error('Create organization error:', error)
-      toast.error(error.response?.data?.message || 'Failed to create organization')
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create organization'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }

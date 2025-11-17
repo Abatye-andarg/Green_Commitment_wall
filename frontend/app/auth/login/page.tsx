@@ -42,8 +42,9 @@ function LoginContent() {
     signIn('google', { callbackUrl: '/dashboard' })
   }
 
-  const handleOrgRedirect = () => {
-    router.push('/org/register')
+  const handleOrgSignIn = () => {
+    // Sign in first, then redirect to org registration
+    signIn('google', { callbackUrl: '/org/register' })
   }
 
   // Show account type selection if not specified
@@ -137,12 +138,12 @@ function LoginContent() {
           </CardContent>
           <CardFooter className="flex flex-col gap-3 p-6">
             <Button
-              onClick={handleOrgRedirect}
+              onClick={handleOrgSignIn}
               className="w-full bg-[#3A7D44] hover:bg-[#3A7D44]/90 text-white font-bold py-6 text-base rounded-xl shadow-lg"
               size="lg"
             >
               <Building2 className="w-5 h-5 mr-2" />
-              Register New Organization
+              Sign in to Register Organization
             </Button>
             <Button
               variant="outline"
