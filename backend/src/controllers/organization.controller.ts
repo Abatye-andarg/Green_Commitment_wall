@@ -6,6 +6,7 @@ import User from '../models/User';
 import Commitment from '../models/Commitment';
 import Challenge from '../models/Challenge';
 import ProgressUpdate from '../models/ProgressUpdate';
+import JoinRequest from '../models/JoinRequest';
 
 class AppError extends Error {
   statusCode: number;
@@ -703,6 +704,203 @@ export async function getOrganizationChallenges(req: AuthRequest, res: Response)
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch challenges',
+    });
+  }
+}
+
+/**
+ * Create a join request for an organization
+ * POST /api/organizations/:id/join-request
+ */
+export async function createJoinRequest(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    if (!req.user) {
+      throw new AppError('Not authenticated', 401);
+    }
+
+    const { message } = req.body;
+    const userId = req.user._id;
+    const organizationId = req.params.id;
+
+    // Check if organization exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      throw new AppError('Organization not found', 404);
+    }
+
+    // Check if user already belongs to an organization
+    const user = await User.findById(userId);
+    if (user?.organizationId) {
+      throw new AppError('You already belong to an organization', 400);
+    }
+
+    // Check if user already has a pending request for this org
+    const existingRequest = await JoinRequest.findOne({
+      userId,
+      organizationId,
+      status: 'pending',
+    });
+
+    if (existingRequest) {
+      throw new AppError('You already have a pending request for this organization', 400);
+    }
+
+    // Create join request
+    const joinRequest = await JoinRequest.create({
+      userId,
+      organizationId,
+      message,
+      status: 'pending',
+    });
+
+    res.status(201).json({
+      status: 'success',
+      data: { joinRequest },
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({
+        status: 'fail',
+        message: error.message,
+      });
+    } else {
+      console.error('Create join request error:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to create join request',
+      });
+    }
+  }
+}
+
+/**
+ * Get join requests for an organization (admin only)
+ * GET /api/organizations/:id/join-requests
+ */
+export async function getJoinRequests(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const { status = 'pending' } = req.query;
+    const organizationId = req.params.id;
+
+    const query: any = { organizationId };
+    if (status) query.status = status;
+
+    const joinRequests = await JoinRequest.find(query)
+      .populate('userId', 'name email image')
+      .populate('reviewedBy', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      status: 'success',
+      data: { joinRequests },
+    });
+  } catch (error) {
+    console.error('Get join requests error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch join requests',
+    });
+  }
+}
+
+/**
+ * Review a join request (approve/reject) - admin only
+ * PATCH /api/organizations/:id/join-requests/:requestId
+ */
+export async function reviewJoinRequest(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    if (!req.user) {
+      throw new AppError('Not authenticated', 401);
+    }
+
+    const { action } = req.body; // 'approve' or 'reject'
+    const { id: organizationId, requestId } = req.params;
+
+    if (!['approve', 'reject'].includes(action)) {
+      throw new AppError('Invalid action. Must be approve or reject', 400);
+    }
+
+    const joinRequest = await JoinRequest.findOne({
+      _id: requestId,
+      organizationId,
+      status: 'pending',
+    });
+
+    if (!joinRequest) {
+      throw new AppError('Join request not found or already processed', 404);
+    }
+
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      throw new AppError('Organization not found', 404);
+    }
+
+    if (action === 'approve') {
+      // Add user to organization
+      if (!organization.memberUserIds.includes(joinRequest.userId)) {
+        organization.memberUserIds.push(joinRequest.userId);
+        await organization.save();
+      }
+
+      // Update user
+      await User.findByIdAndUpdate(joinRequest.userId, {
+        organizationId: organization._id,
+        role: 'org_member',
+      });
+
+      joinRequest.status = 'approved';
+    } else {
+      joinRequest.status = 'rejected';
+    }
+
+    joinRequest.reviewedBy = req.user._id as mongoose.Types.ObjectId;
+    joinRequest.reviewedAt = new Date();
+    await joinRequest.save();
+
+    res.json({
+      status: 'success',
+      data: { joinRequest },
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({
+        status: 'fail',
+        message: error.message,
+      });
+    } else {
+      console.error('Review join request error:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to review join request',
+      });
+    }
+  }
+}
+
+/**
+ * Get user's join requests
+ * GET /api/organizations/my-requests
+ */
+export async function getMyJoinRequests(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    if (!req.user) {
+      throw new AppError('Not authenticated', 401);
+    }
+
+    const joinRequests = await JoinRequest.find({ userId: req.user._id })
+      .populate('organizationId', 'name type logo')
+      .populate('reviewedBy', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      status: 'success',
+      data: { joinRequests },
+    });
+  } catch (error) {
+    console.error('Get my join requests error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch join requests',
     });
   }
 }

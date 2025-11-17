@@ -310,6 +310,29 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
       throw new AppError('Organization not found', 404);
     }
 
+    // Ensure memberUserIds exists and is an array
+    const memberUserIds = organization.memberUserIds || [];
+    
+    if (memberUserIds.length === 0) {
+      // Return empty report if no members
+      return res.json({
+        status: 'success',
+        data: {
+          organization,
+          stats: {
+            totalCarbonSaved: 0,
+            totalCommitments: 0,
+            activeCommitments: 0,
+            completedCommitments: 0,
+            memberCount: 0,
+            activeMembers: 0,
+            participationRate: 0,
+          },
+          categoryBreakdown: [],
+        },
+      });
+    }
+
     // Build date filter
     const dateFilter: any = {};
     if (startDate || endDate) {
@@ -322,7 +345,7 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
     const memberCommitments = await Commitment.aggregate([
       { 
         $match: { 
-          userId: { $in: organization.memberUserIds },
+          userId: { $in: memberUserIds },
           ...dateFilter
         } 
       },
@@ -345,7 +368,7 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
     const categoryBreakdown = await Commitment.aggregate([
       { 
         $match: { 
-          userId: { $in: organization.memberUserIds },
+          userId: { $in: memberUserIds },
           ...dateFilter
         } 
       },
@@ -360,9 +383,9 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
     ]);
 
     // Participation metrics
-    const memberCount = organization.memberUserIds.length;
+    const memberCount = memberUserIds.length;
     const activeMembers = await User.countDocuments({
-      _id: { $in: organization.memberUserIds },
+      _id: { $in: memberUserIds },
       totalCommitments: { $gt: 0 },
     });
     const participationRate = memberCount > 0 ? (activeMembers / memberCount) * 100 : 0;
@@ -380,7 +403,7 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
       const previousCommitments = await Commitment.aggregate([
         { 
           $match: { 
-            userId: { $in: organization.memberUserIds },
+            userId: { $in: memberUserIds },
             createdAt: { $gte: previousStart, $lte: previousEnd }
           } 
         },
@@ -433,7 +456,11 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
       },
     });
   } catch (error) {
-    throw new AppError('Failed to generate CSR report', 500);
+    console.error('CSR Report Generation Error:', error);
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(`Failed to generate CSR report: ${error instanceof Error ? error.message : 'Unknown error'}`, 500);
   }
 }
 
