@@ -64,6 +64,10 @@ export default function OrganizationDashboardPage() {
     }
 
     if (status === 'authenticated') {
+      // Store orgId in localStorage so commitment pages know where to return
+      if (orgId) {
+        localStorage.setItem('currentOrgContext', orgId)
+      }
       loadDashboard()
     }
   }, [status, orgId])

@@ -35,6 +35,16 @@ export default function CommitmentDetailPage() {
     }
   }, [status, params.id, router])
 
+  const handleBackNavigation = () => {
+    // Check if we're in org context
+    const orgContext = localStorage.getItem('currentOrgContext')
+    if (orgContext) {
+      router.push(`/org/${orgContext}/dashboard`)
+    } else {
+      router.push('/dashboard')
+    }
+  }
+
   const loadCommitmentData = async () => {
     try {
       setLoading(true)
@@ -110,11 +120,14 @@ export default function CommitmentDetailPage() {
   }
 
   if (!commitment) {
+    const orgContext = localStorage.getItem('currentOrgContext')
+    const backUrl = orgContext ? `/org/${orgContext}/dashboard` : '/dashboard'
+    
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#2a2520]">
         <div className="text-center">
           <p className="text-white mb-4">Commitment not found</p>
-          <Button onClick={() => router.push('/dashboard')} className="bg-[#3A7D44]">
+          <Button onClick={() => router.push(backUrl)} className="bg-[#3A7D44]">
             Back to Dashboard
           </Button>
         </div>
@@ -140,7 +153,7 @@ export default function CommitmentDetailPage() {
             <Button 
               variant="ghost" 
               className="gap-2 text-white hover:text-[#3A7D44] hover:bg-white/10"
-              onClick={() => router.push('/dashboard')}
+              onClick={handleBackNavigation}
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard

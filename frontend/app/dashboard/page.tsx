@@ -32,6 +32,8 @@ export default function DashboardPage() {
     }
 
     if (status === 'authenticated') {
+      // Clear org context when viewing personal dashboard
+      localStorage.removeItem('currentOrgContext')
       loadDashboardData()
     }
   }, [status, router])

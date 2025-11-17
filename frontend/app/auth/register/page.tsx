@@ -25,26 +25,30 @@ function RegisterContent() {
   useEffect(() => {
     if (status === 'authenticated') {
       const user = session?.user as any
-      // If user is org_admin, redirect to org dashboard
-      if (user?.role === 'org_admin' && user?.organizationId) {
+      // Check if user wants to register an org
+      const wantsOrgRegistration = searchParams.get('intent') === 'org-register'
+      
+      if (wantsOrgRegistration) {
+        router.push('/org/register')
+      } else if (user?.role === 'org_admin' && user?.organizationId) {
         router.push(`/org/${user.organizationId}/dashboard`)
       } else {
         router.push('/dashboard')
       }
     }
-  }, [status, router, session])
+  }, [status, router, session, searchParams])
 
   if (status === 'authenticated') {
     return null
   }
 
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/dashboard' })
+    signIn('google', { callbackUrl: '/auth/register?type=user' })
   }
 
   const handleOrgSignIn = () => {
-    // Sign in first, then redirect to org registration
-    signIn('google', { callbackUrl: '/org/register' })
+    // Sign in with intent to register organization
+    signIn('google', { callbackUrl: '/auth/register?type=organization&intent=org-register' })
   }
 
   // Show account type selection if not specified

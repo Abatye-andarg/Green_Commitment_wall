@@ -8,7 +8,8 @@ import { DesktopSidebar } from '@/components/desktop-sidebar'
 import { LeafIcon } from '@/components/leaf-icon'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Award, Leaf, TrendingUp, Trophy, Zap, Crown, Star } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Award, Leaf, TrendingUp, Trophy, Zap, Crown, Star, Building2, ArrowRight } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 
 export default function ProfilePage() {
@@ -116,6 +117,30 @@ export default function ProfilePage() {
                 </Badge>
               </div>
             </div>
+
+            {/* Organization Mode Switcher */}
+            {(session.user as any)?.organizationId && (
+              <div className="bg-gradient-to-br from-[#1a1612]/80 to-[#2a2520]/80 backdrop-blur-xl rounded-2xl p-6 border border-[#3A7D44]/30 shadow-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center shadow-xl">
+                      <Building2 className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-[#F4FCE7]">Organization Mode</h3>
+                      <p className="text-sm text-[#A8D5BA]/70">Manage your organization's environmental commitments</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => router.push(`/org/${(session.user as any).organizationId}/dashboard`)}
+                    className="bg-gradient-to-r from-[#3A7D44] to-[#A8D5BA] hover:scale-105 transition-transform text-white font-bold shadow-lg"
+                  >
+                    Switch to Organization
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
