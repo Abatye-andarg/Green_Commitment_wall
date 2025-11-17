@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { AddProgressDialog } from '@/components/add-progress-dialog'
 import { DesktopSidebar } from '@/components/desktop-sidebar'
-import { ArrowLeft, Calendar, TrendingUp, Award, Plus, Loader2, Leaf, Target, Zap } from 'lucide-react'
+import { ArrowLeft, Calendar, TrendingUp, Award, Plus, Loader2, Leaf, Target, Zap, CheckCircle2, Circle, Flag } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { toast } from 'sonner'
 
@@ -19,6 +19,7 @@ export default function CommitmentDetailPage() {
   const { data: session, status } = useSession()
   const [commitment, setCommitment] = useState<any>(null)
   const [progressUpdates, setProgressUpdates] = useState<any[]>([])
+  const [milestones, setMilestones] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [totalCompletions, setTotalCompletions] = useState(0)
   const [expectedCompletions, setExpectedCompletions] = useState(0)
@@ -37,18 +38,23 @@ export default function CommitmentDetailPage() {
   const loadCommitmentData = async () => {
     try {
       setLoading(true)
-      const [commitmentData, progressData] = await Promise.all([
+      const [commitmentData, progressData, milestonesData] = await Promise.all([
         apiClient.getCommitmentById(params.id as string),
-        apiClient.getProgressUpdates(params.id as string)
+        apiClient.getProgressUpdates(params.id as string),
+        apiClient.getMilestones(params.id as string)
       ])
       
-      const commitmentInfo = commitmentData.data || commitmentData
+      const commitmentInfo = commitmentData.data?.commitment || commitmentData.data || commitmentData
       setCommitment(commitmentInfo)
       
       // Backend returns { status: 'success', data: { progressUpdates: [...] } }
       const updates = progressData.data?.progressUpdates || progressData.progressUpdates || progressData.data || []
       const updatesArray = Array.isArray(updates) ? updates : []
       setProgressUpdates(updatesArray)
+      
+      // Extract milestones
+      const milestonesArray = milestonesData.data?.milestones || milestonesData.milestones || milestonesData.data || []
+      setMilestones(Array.isArray(milestonesArray) ? milestonesArray : [])
       
       // Calculate total completions
       const total = updatesArray.reduce((sum: number, update: any) => {
@@ -249,6 +255,139 @@ export default function CommitmentDetailPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Milestone Path */}
+            {milestones.length > 0 && (
+              <Card className="bg-linear-to-br from-[#3A7D44]/10 to-[#A8D5BA]/10 border-2 border-[#3A7D44]/30 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-[#2a2520] flex items-center gap-2">
+                    <Flag className="h-5 w-5 text-[#3A7D44]" />
+                    Your Journey Path
+                  </CardTitle>
+                  <p className="text-sm text-[#2a2520]/60">
+                    AI-generated milestones to keep you on track
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative">
+                    {/* Progress Line */}
+                    <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#3A7D44]/20" />
+                    
+                    {/* Milestones */}
+                    <div className="space-y-8">
+                      {milestones.map((milestone: any, index: number) => {
+                        const isCompleted = milestone.status === 'completed'
+                        const isInProgress = milestone.status === 'in_progress'
+                        const isPending = milestone.status === 'pending'
+                        const progress = milestone.targetValue > 0 
+                          ? Math.min((milestone.currentValue / milestone.targetValue) * 100, 100) 
+                          : 0
+
+                        return (
+                          <div key={milestone._id || index} className="relative flex gap-4">
+                            {/* Milestone Icon */}
+                            <div className={`relative z-10 shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                              isCompleted 
+                                ? 'bg-[#3A7D44] shadow-lg shadow-[#3A7D44]/50' 
+                                : isInProgress
+                                ? 'bg-[#A8D5BA] border-2 border-[#3A7D44] animate-pulse'
+                                : 'bg-white border-2 border-[#3A7D44]/30'
+                            }`}>
+                              {isCompleted ? (
+                                <CheckCircle2 className="h-6 w-6 text-white" />
+                              ) : isInProgress ? (
+                                <Circle className="h-6 w-6 text-[#3A7D44] fill-[#3A7D44]" />
+                              ) : (
+                                <Circle className="h-6 w-6 text-[#3A7D44]/30" />
+                              )}
+                            </div>
+
+                            {/* Milestone Content */}
+                            <div className={`flex-1 pb-8 ${isCompleted ? 'opacity-75' : ''}`}>
+                              <div className={`rounded-lg p-4 transition-all duration-300 ${
+                                isCompleted
+                                  ? 'bg-[#3A7D44]/10 border-2 border-[#3A7D44]/30'
+                                  : isInProgress
+                                  ? 'bg-[#F4FCE7] border-2 border-[#3A7D44] shadow-md'
+                                  : 'bg-white/50 border-2 border-[#3A7D44]/20'
+                              }`}>
+                                <div className="flex items-start justify-between gap-3 mb-2">
+                                  <div className="flex-1">
+                                    <h3 className={`font-semibold mb-1 ${
+                                      isCompleted ? 'text-[#3A7D44] line-through' : 'text-[#2a2520]'
+                                    }`}>
+                                      {milestone.title}
+                                    </h3>
+                                    <p className="text-sm text-[#2a2520]/70">
+                                      {milestone.description}
+                                    </p>
+                                  </div>
+                                  <div className="flex flex-col items-end gap-1">
+                                    {isCompleted && milestone.completedAt && (
+                                      <Badge className="bg-[#3A7D44] text-white">
+                                        Completed
+                                      </Badge>
+                                    )}
+                                    {isInProgress && (
+                                      <Badge className="bg-[#A8D5BA] text-[#2a2520]">
+                                        In Progress
+                                      </Badge>
+                                    )}
+                                    {isPending && (
+                                      <Badge variant="outline" className="border-[#3A7D44]/30 text-[#2a2520]/60">
+                                        Pending
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Progress Bar for milestone */}
+                                {!isCompleted && (
+                                  <div className="mt-3 space-y-1">
+                                    <div className="flex items-center justify-between text-xs">
+                                      <span className="text-[#2a2520]/60">
+                                        {milestone.currentValue} / {milestone.targetValue} completions
+                                      </span>
+                                      <span className="font-semibold text-[#3A7D44]">
+                                        {progress.toFixed(0)}%
+                                      </span>
+                                    </div>
+                                    <Progress 
+                                      value={progress} 
+                                      className="h-2 bg-[#3A7D44]/10"
+                                    />
+                                  </div>
+                                )}
+
+                                {/* Carbon Impact */}
+                                {milestone.estimatedCarbonSavings > 0 && (
+                                  <div className="mt-2 flex items-center gap-2 text-xs text-[#3A7D44]">
+                                    <Leaf className="h-3 w-3" />
+                                    <span>
+                                      {isCompleted ? 'Saved' : 'Will save'} ~{milestone.estimatedCarbonSavings.toFixed(1)} kg CO₂
+                                    </span>
+                                  </div>
+                                )}
+
+                                {isCompleted && milestone.completedAt && (
+                                  <div className="mt-2 text-xs text-[#2a2520]/50">
+                                    Completed on {new Date(milestone.completedAt).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Progress Section */}
             <Card className="bg-[#F4FCE7]/95 border-2 border-[#3A7D44]/30 backdrop-blur-sm">

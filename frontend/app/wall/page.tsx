@@ -93,6 +93,16 @@ export default function WallPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const router = useRouter()
 
+  const handleLikeChange = (commitmentId: string, liked: boolean, newCount: number) => {
+    setCommitments(prevCommitments =>
+      prevCommitments.map(c =>
+        c._id === commitmentId
+          ? { ...c, likeCount: newCount, isLiked: liked, likes: c.likes?.includes(session?.user?.id) ? c.likes : (liked ? [...(c.likes || []), session?.user?.id] : c.likes?.filter((id: string) => id !== session?.user?.id)) }
+          : c
+      )
+    )
+  }
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/login')
@@ -259,17 +269,23 @@ export default function WallPage() {
                                  commitment.carbonSaved || 
                                  0;
               
+              // Check if current user liked this commitment
+              const isLiked = commitment.likes?.includes(session?.user?.id) || false
+              
               return (
                 <InstagramCommitmentCard
                   key={commitment._id || commitment.id}
+                  commitmentId={commitment._id || commitment.id}
                   userName={commitment.userId?.name || commitment.userName || 'Anonymous'}
                   userInitials={commitment.userId?.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2) || commitment.userInitials || 'AN'}
                   commitment={commitment.text || commitment.title || commitment.commitment || 'No description'}
                   category={commitment.category || 'other'}
                   carbonSaved={carbonSaved}
-                  likes={commitment.likeCount || commitment.likesCount || commitment.likes || 0}
+                  likes={commitment.likeCount || commitment.likesCount || commitment.likes?.length || 0}
                   comments={commitment.commentCount || commitment.commentsCount || commitment.comments || 0}
-                  timeAgo={commitment.timeAgo || 'Recently'}
+                  timeAgo={commitment.timeAgo || new Date(commitment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) || 'Recently'}
+                  isLiked={isLiked}
+                  onLikeChange={(liked, newCount) => handleLikeChange(commitment._id, liked, newCount)}
                 />
               );
             })}

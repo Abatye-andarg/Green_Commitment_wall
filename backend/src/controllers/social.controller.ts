@@ -302,15 +302,30 @@ export async function getOrganization(req: AuthRequest, res: Response): Promise<
  */
 export async function getCSRReport(req: AuthRequest, res: Response): Promise<void> {
   try {
+    const { startDate, endDate } = req.query;
+    
     const organization = await Organization.findById(req.params.id);
 
     if (!organization) {
       throw new AppError('Organization not found', 404);
     }
 
+    // Build date filter
+    const dateFilter: any = {};
+    if (startDate || endDate) {
+      dateFilter.createdAt = {};
+      if (startDate) dateFilter.createdAt.$gte = new Date(startDate as string);
+      if (endDate) dateFilter.createdAt.$lte = new Date(endDate as string);
+    }
+
     // Aggregate commitment data for members
     const memberCommitments = await Commitment.aggregate([
-      { $match: { userId: { $in: organization.memberUserIds } } },
+      { 
+        $match: { 
+          userId: { $in: organization.memberUserIds },
+          ...dateFilter
+        } 
+      },
       {
         $group: {
           _id: null,
@@ -319,13 +334,21 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
           activeCommitments: {
             $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] },
           },
+          completedCommitments: {
+            $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },
+          },
         },
       },
     ]);
 
     // Category breakdown
     const categoryBreakdown = await Commitment.aggregate([
-      { $match: { userId: { $in: organization.memberUserIds } } },
+      { 
+        $match: { 
+          userId: { $in: organization.memberUserIds },
+          ...dateFilter
+        } 
+      },
       {
         $group: {
           _id: '$category',
@@ -333,21 +356,80 @@ export async function getCSRReport(req: AuthRequest, res: Response): Promise<voi
           carbonSaved: { $sum: '$actualCarbonSaved' },
         },
       },
+      { $sort: { carbonSaved: -1 } },
     ]);
+
+    // Participation metrics
+    const memberCount = organization.memberUserIds.length;
+    const activeMembers = await User.countDocuments({
+      _id: { $in: organization.memberUserIds },
+      totalCommitments: { $gt: 0 },
+    });
+    const participationRate = memberCount > 0 ? (activeMembers / memberCount) * 100 : 0;
+
+    // Trend analysis (if date range provided, compare to previous period)
+    let comparisonData = null;
+    if (startDate && endDate) {
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+      const periodLength = end.getTime() - start.getTime();
+      
+      const previousStart = new Date(start.getTime() - periodLength);
+      const previousEnd = start;
+
+      const previousCommitments = await Commitment.aggregate([
+        { 
+          $match: { 
+            userId: { $in: organization.memberUserIds },
+            createdAt: { $gte: previousStart, $lte: previousEnd }
+          } 
+        },
+        {
+          $group: {
+            _id: null,
+            totalCarbonSaved: { $sum: '$actualCarbonSaved' },
+            totalCommitments: { $sum: 1 },
+          },
+        },
+      ]);
+
+      if (previousCommitments[0]) {
+        comparisonData = {
+          previousPeriod: {
+            totalCarbonSaved: previousCommitments[0].totalCarbonSaved,
+            totalCommitments: previousCommitments[0].totalCommitments,
+          },
+          changes: {
+            carbonSavedChange: memberCommitments[0] ? 
+              ((memberCommitments[0].totalCarbonSaved - previousCommitments[0].totalCarbonSaved) / 
+                (previousCommitments[0].totalCarbonSaved || 1) * 100) : 0,
+            commitmentsChange: memberCommitments[0] ?
+              ((memberCommitments[0].totalCommitments - previousCommitments[0].totalCommitments) / 
+                (previousCommitments[0].totalCommitments || 1) * 100) : 0,
+          },
+        };
+      }
+    }
 
     const stats = memberCommitments[0] || {
       totalCarbonSaved: 0,
       totalCommitments: 0,
       activeCommitments: 0,
+      completedCommitments: 0,
     };
 
     res.json({
       status: 'success',
       data: {
         organization,
-        stats,
+        stats: {
+          ...stats,
+          memberCount,
+          activeMembers,
+          participationRate: Math.round(participationRate * 10) / 10,
+        },
         categoryBreakdown,
-        memberCount: organization.memberUserIds.length,
+        ...(comparisonData && { comparison: comparisonData }),
       },
     });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { jwtVerify } from 'jose';
 import User, { IUser } from '../models/User';
+import Organization from '../models/Organization';
 
 export interface AuthRequest extends Request {
   user?: IUser;
@@ -113,4 +114,88 @@ export const optionalAuth = async (
     console.error('⚠️ JWT verification failed in optionalAuth:', error);
     next();
   }
+};
+
+/**
+ * Middleware to check if user is admin of a specific organization
+ */
+export const requireOrgAdmin = (orgIdParam: string = 'id') => {
+  return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Not authenticated' });
+        return;
+      }
+
+      // System admin can access all orgs
+      if (req.user.role === 'admin') {
+        next();
+        return;
+      }
+
+      const orgId = req.params[orgIdParam];
+      const organization = await Organization.findById(orgId);
+
+      if (!organization) {
+        res.status(404).json({ error: 'Organization not found' });
+        return;
+      }
+
+      const isAdmin = organization.adminUserIds.some(
+        id => id.toString() === req.user!._id.toString()
+      );
+
+      if (!isAdmin) {
+        res.status(403).json({ error: 'Not an admin of this organization' });
+        return;
+      }
+
+      next();
+    } catch (error) {
+      console.error('Organization admin check error:', error);
+      res.status(500).json({ error: 'Failed to verify organization permissions' });
+    }
+  };
+};
+
+/**
+ * Middleware to check if user is a member of a specific organization
+ */
+export const requireOrgMember = (orgIdParam: string = 'id') => {
+  return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Not authenticated' });
+        return;
+      }
+
+      // System admin can access all orgs
+      if (req.user.role === 'admin') {
+        next();
+        return;
+      }
+
+      const orgId = req.params[orgIdParam];
+      const organization = await Organization.findById(orgId);
+
+      if (!organization) {
+        res.status(404).json({ error: 'Organization not found' });
+        return;
+      }
+
+      const isMember = organization.memberUserIds.some(
+        id => id.toString() === req.user!._id.toString()
+      );
+
+      if (!isMember) {
+        res.status(403).json({ error: 'Not a member of this organization' });
+        return;
+      }
+
+      next();
+    } catch (error) {
+      console.error('Organization member check error:', error);
+      res.status(500).json({ error: 'Failed to verify organization membership' });
+    }
+  };
 };

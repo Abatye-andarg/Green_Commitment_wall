@@ -14,6 +14,7 @@ import wallRoutes from './routes/wall.routes';
 import progressRoutes from './routes/progress.routes';
 import socialRoutes from './routes/social.routes';
 import userRoutes from './routes/user.routes';
+import organizationRoutes from './routes/organization.routes';
 
 // Create Express app
 const app: Application = express();
@@ -64,6 +65,7 @@ app.use('/api/wall', wallRoutes);
 app.use('/api', progressRoutes); // Includes dashboard and progress routes
 app.use('/api', socialRoutes); // Includes notifications, challenges, organizations, admin
 app.use('/api/users', userRoutes);
+app.use('/api/organizations', organizationRoutes);
 
 // 404 handler
 app.use(notFoundHandler);

@@ -10,6 +10,7 @@ export interface IUser extends Document {
   location?: string;
   sustainabilityFocusAreas: string[];
   role: 'user' | 'org_admin' | 'admin';
+  organizationId?: mongoose.Types.ObjectId;
   totalCarbonSaved: number;
   totalCommitments: number;
   completedMilestones: number;
@@ -63,6 +64,11 @@ const UserSchema: Schema = new Schema(
       type: String,
       enum: ['user', 'org_admin', 'admin'],
       default: 'user',
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      default: null,
     },
     totalCarbonSaved: {
       type: Number,

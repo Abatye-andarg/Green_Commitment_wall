@@ -198,6 +198,73 @@ class ApiClient {
     const response = await this.client.patch(`/notifications/${id}/read`);
     return response.data;
   }
+
+  // Organization endpoints
+  async createOrganization(data: {
+    name: string;
+    type: 'company' | 'ngo' | 'school' | 'government' | 'other';
+    description?: string;
+    logo?: string;
+    settings?: any;
+  }) {
+    const response = await this.client.post('/organizations', data);
+    return response.data;
+  }
+
+  async getOrganization(id: string) {
+    const response = await this.client.get(`/organizations/${id}`);
+    return response.data;
+  }
+
+  async updateOrganization(id: string, data: any) {
+    const response = await this.client.patch(`/organizations/${id}`, data);
+    return response.data;
+  }
+
+  async deleteOrganization(id: string) {
+    const response = await this.client.delete(`/organizations/${id}`);
+    return response.data;
+  }
+
+  async listOrganizations(params?: { page?: number; limit?: number; type?: string; search?: string }) {
+    const response = await this.client.get('/organizations', { params });
+    return response.data;
+  }
+
+  async getOrgMembers(id: string, params?: { page?: number; limit?: number; search?: string; sortBy?: string }) {
+    const response = await this.client.get(`/organizations/${id}/members`, { params });
+    return response.data;
+  }
+
+  async addOrgMember(id: string, userId: string, makeAdmin = false) {
+    const response = await this.client.post(`/organizations/${id}/members`, { userId, makeAdmin });
+    return response.data;
+  }
+
+  async removeOrgMember(id: string, userId: string) {
+    const response = await this.client.delete(`/organizations/${id}/members/${userId}`);
+    return response.data;
+  }
+
+  async toggleOrgAdmin(id: string, userId: string) {
+    const response = await this.client.patch(`/organizations/${id}/members/${userId}/admin`);
+    return response.data;
+  }
+
+  async getOrgDashboard(id: string, params?: { startDate?: string; endDate?: string }) {
+    const response = await this.client.get(`/organizations/${id}/dashboard`, { params });
+    return response.data;
+  }
+
+  async getOrgChallenges(id: string, params?: { status?: string; page?: number; limit?: number }) {
+    const response = await this.client.get(`/organizations/${id}/challenges`, { params });
+    return response.data;
+  }
+
+  async getOrgCSRReport(id: string, params?: { startDate?: string; endDate?: string }) {
+    const response = await this.client.get(`/organizations/${id}/csr-report`, { params });
+    return response.data;
+  }
 }
 
 export const apiClient = new ApiClient();
