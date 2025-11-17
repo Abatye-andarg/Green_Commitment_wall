@@ -184,8 +184,8 @@ export default function WallPage() {
       {/* Main Content */}
       <div className="md:ml-20 lg:ml-72 relative z-10 transition-all duration-300">
         {/* Header - Desktop */}
-        <header className="sticky top-0 z-50 hidden md:block backdrop-blur-xl bg-gradient-to-r from-[#1a1612]/95 via-[#2a2520]/95 to-[#1a1612]/95 border-b border-[#3A7D44]/30 shadow-lg">
-          <div className="container mx-auto px-6 py-4 flex items-center justify-between max-w-6xl">
+        <header className="sticky top-0 z-40 hidden md:block backdrop-blur-xl bg-[#1a1612]/95 border-b border-[#3A7D44]/30 shadow-lg">
+          <div className="container mx-auto px-6 py-4 flex items-center justify-between max-w-7xl">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-[#3A7D44] animate-pulse" />

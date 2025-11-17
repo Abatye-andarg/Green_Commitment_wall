@@ -108,10 +108,28 @@ export default function OrganizationDashboardPage() {
   const { organization, stats, categoryBreakdown, topContributors } = orgData
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#2a2520] via-[#3d3530] to-[#2a2520]">
+    <div className="min-h-screen bg-gradient-to-br from-[#2a2520] via-[#3d3530] to-[#2a2520] relative">
+      {/* Background textures */}
+      <div 
+        className="fixed inset-0 opacity-30 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' fill='%23000000' fillOpacity='0.4' fillRule='evenodd'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <div 
+        className="fixed inset-0 opacity-20 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' fill='%233A7D44' fillOpacity='0.4' fillRule='evenodd'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#3A7D44]/40 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-[#A8D5BA]/30 rounded-full blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="border-b border-[#3A7D44]/30 bg-[#2a2520]/90 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b border-[#3A7D44]/30 bg-[#1a1612]/95 backdrop-blur-xl sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center shadow-lg">
@@ -144,7 +162,7 @@ export default function OrganizationDashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
         {/* Organization Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between">

@@ -265,6 +265,29 @@ class ApiClient {
     const response = await this.client.get(`/organizations/${id}/csr-report`, { params });
     return response.data;
   }
+
+  // Join Request endpoints
+  async createJoinRequest(organizationId: string, message?: string) {
+    const response = await this.client.post(`/organizations/${organizationId}/join-request`, { message });
+    return response.data;
+  }
+
+  async getOrgJoinRequests(organizationId: string, status?: string) {
+    const response = await this.client.get(`/organizations/${organizationId}/join-requests`, { 
+      params: { status } 
+    });
+    return response.data;
+  }
+
+  async reviewJoinRequest(organizationId: string, requestId: string, action: 'approve' | 'reject') {
+    const response = await this.client.patch(`/organizations/${organizationId}/join-requests/${requestId}`, { action });
+    return response.data;
+  }
+
+  async getMyJoinRequests() {
+    const response = await this.client.get('/organizations/my-requests/all');
+    return response.data;
+  }
 }
 
 export const apiClient = new ApiClient();

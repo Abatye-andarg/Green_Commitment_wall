@@ -117,7 +117,7 @@ export default function StatsPage() {
 
       <div className="md:ml-20 lg:ml-72 relative z-10 transition-all duration-300">
         {/* Header */}
-        <header className="sticky top-0 z-50 backdrop-blur-xl bg-gradient-to-r from-[#1a1612]/95 via-[#2a2520]/95 to-[#1a1612]/95 border-b border-[#3A7D44]/30 shadow-lg">
+        <header className="sticky top-0 z-40 backdrop-blur-xl bg-[#1a1612]/95 border-b border-[#3A7D44]/30 shadow-lg">
           <div className="container mx-auto px-6 py-4 flex items-center justify-between max-w-7xl">
             <div className="flex items-center gap-4">
               <BarChart3 className="w-6 h-6 text-[#3A7D44]" />

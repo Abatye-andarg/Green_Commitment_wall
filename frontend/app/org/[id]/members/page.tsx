@@ -35,7 +35,10 @@ import {
   ShieldOff,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Clock,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { toast } from 'sonner'
@@ -59,6 +62,7 @@ export default function OrganizationMembersPage() {
 
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState<Member[]>([])
+  const [joinRequests, setJoinRequests] = useState<any[]>([])
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 1 })
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('carbonSaved')
@@ -81,8 +85,11 @@ export default function OrganizationMembersPage() {
     if (status === 'authenticated') {
       loadOrganization()
       loadMembers()
+      if (isAdmin) {
+        loadJoinRequests()
+      }
     }
-  }, [status, orgId, pagination.page, sortBy])
+  }, [status, orgId, pagination.page, sortBy, isAdmin])
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -129,6 +136,29 @@ export default function OrganizationMembersPage() {
     }
   }
 
+  const loadJoinRequests = async () => {
+    try {
+      const response = await apiClient.getOrgJoinRequests(orgId, 'pending')
+      setJoinRequests(response.data?.joinRequests || [])
+    } catch (error) {
+      console.error('Failed to load join requests:', error)
+    }
+  }
+
+  const handleReviewRequest = async (requestId: string, action: 'approve' | 'reject') => {
+    try {
+      setActionLoading(true)
+      await apiClient.reviewJoinRequest(orgId, requestId, action)
+      toast.success(`Request ${action}d successfully`)
+      loadJoinRequests()
+      loadMembers()
+    } catch (error: any) {
+      toast.error(error.message || `Failed to ${action} request`)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const handleToggleAdmin = async (member: Member) => {
     setActionLoading(true)
     try {
@@ -169,7 +199,7 @@ export default function OrganizationMembersPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-[#2a2520] via-[#3d3530] to-[#2a2520]">
       {/* Header */}
-      <header className="border-b border-[#3A7D44]/30 bg-[#2a2520]/90 backdrop-blur-lg sticky top-0 z-50">
+      <header className="border-b border-[#3A7D44]/30 bg-[#1a1612]/95 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href={`/org/${orgId}/dashboard`} className="flex items-center gap-3">
@@ -249,6 +279,62 @@ export default function OrganizationMembersPage() {
             </div>
           </div>
         </Card>
+
+        {/* Pending Join Requests */}
+        {isAdmin && joinRequests.length > 0 && (
+          <Card className="bg-[#F4FCE7] border-2 border-[#3A7D44]/20 p-6">
+            <h2 className="text-xl font-bold text-[#2a2520] mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-[#3A7D44]" />
+              Pending Join Requests ({joinRequests.length})
+            </h2>
+            <div className="space-y-3">
+              {joinRequests.map((request: any) => (
+                <div key={request._id} className="bg-white border-2 border-[#3A7D44]/20 rounded-lg p-4 flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Avatar className="w-10 h-10 border-2 border-[#3A7D44]">
+                        <AvatarImage src={request.userId?.profileImage} />
+                        <AvatarFallback className="bg-[#3A7D44] text-white">
+                          {request.userId?.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold text-[#2a2520]">{request.userId?.name}</p>
+                        <p className="text-sm text-[#2a2520]/60">{request.userId?.email}</p>
+                      </div>
+                    </div>
+                    {request.message && (
+                      <p className="text-sm text-[#2a2520]/80 bg-[#F4FCE7] p-3 rounded border border-[#3A7D44]/10">
+                        "{request.message}"
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleReviewRequest(request._id, 'approve')}
+                      disabled={actionLoading}
+                      className="bg-[#3A7D44] hover:bg-[#3A7D44]/90 text-white"
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-1" />
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleReviewRequest(request._id, 'reject')}
+                      disabled={actionLoading}
+                      className="border-red-500 text-red-500 hover:bg-red-50"
+                    >
+                      <XCircle className="w-4 h-4 mr-1" />
+                      Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Members Table */}
         <Card className="bg-[#F4FCE7] border-2 border-[#3A7D44]/20 overflow-hidden">

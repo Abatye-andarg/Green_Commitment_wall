@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Home, Globe, User, ChevronLeft, ChevronRight, Sparkles, TrendingUp, Award, BarChart3 } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
+import { Home, Globe, User, Sparkles, BarChart3, Building2, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LeafIcon } from '@/components/leaf-icon'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { toast } from 'sonner'
 
 const navItems = [
   {
@@ -28,16 +31,28 @@ const navItems = [
     gradient: 'from-blue-500 to-cyan-500',
   },
   {
-    label: 'Profile',
-    href: '/profile',
-    icon: User,
-    gradient: 'from-teal-500 to-cyan-500',
+    label: 'Organizations',
+    href: '/organizations',
+    icon: Building2,
+    gradient: 'from-purple-500 to-pink-500',
   },
 ]
 
 export function DesktopSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { data: session } = useSession()
   const [isHovered, setIsHovered] = useState(false)
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false })
+      toast.success('Logged out successfully')
+      router.push('/')
+    } catch (error) {
+      toast.error('Failed to logout')
+    }
+  }
 
   return (
     <aside 
@@ -45,9 +60,9 @@ export function DesktopSidebar() {
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
         "hidden md:flex fixed left-0 top-0 bottom-0 border-r border-[#3A7D44]/20 flex-col z-50 transition-all duration-300 ease-in-out",
-        "bg-gradient-to-b from-[#1a1612] via-[#2a2520] to-[#1a1612]",
+        "bg-gradient-to-b from-[#1a1612]/95 via-[#2a2520]/95 to-[#1a1612]/95 backdrop-blur-xl",
         "shadow-2xl shadow-black/50",
-        isHovered ? "w-72" : "w-20"
+        isHovered ? "w-72" : "w-24"
       )}
     >
       {/* Gradient overlay */}
@@ -113,6 +128,43 @@ export function DesktopSidebar() {
             )
           })}
         </nav>
+
+        {/* User Profile & Logout */}
+        <div className="p-4 border-t border-[#3A7D44]/20 space-y-3">
+          {/* User Info */}
+          {session?.user && (
+            <div className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-xl bg-[#3A7D44]/10",
+              !isHovered && "justify-center"
+            )}>
+              <Avatar className="w-9 h-9 border-2 border-[#3A7D44]/30">
+                {session.user.image && <AvatarImage src={session.user.image} />}
+                <AvatarFallback className="bg-[#3A7D44] text-white text-sm font-bold">
+                  {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              {isHovered && (
+                <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-200">
+                  <p className="text-sm font-semibold text-[#F4FCE7] truncate">{session.user.name}</p>
+                  <p className="text-xs text-[#A8D5BA]/70 truncate">{session.user.email}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Logout Button */}
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            className={cn(
+              "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all",
+              !isHovered && "justify-center"
+            )}
+          >
+            <LogOut className="h-5 w-5" />
+            {isHovered && <span className="font-semibold">Logout</span>}
+          </Button>
+        </div>
 
         {/* Hover indicator */}
         {!isHovered && (

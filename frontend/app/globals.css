@@ -76,7 +76,7 @@
 
 @theme inline {
   /* Friendly, rounded fonts for eco-positive feel */
-  --font-sans: 'Inter', 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);

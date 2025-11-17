@@ -73,7 +73,7 @@ export default function RegisterOrganizationPage() {
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-br from-[#2a2520] via-[#3d3530] to-[#2a2520]">
       {/* Header */}
-      <header className="border-b border-[#3A7D44]/30 bg-[#2a2520]/80 backdrop-blur-lg sticky top-0 z-50">
+      <header className="border-b border-[#3A7D44]/30 bg-[#1a1612]/95 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-[#3A7D44] to-[#A8D5BA] flex items-center justify-center shadow-lg">

@@ -154,7 +154,7 @@ export default function OrganizationReportsPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-[#2a2520] via-[#3d3530] to-[#2a2520]">
       {/* Header */}
-      <header className="border-b border-[#3A7D44]/30 bg-[#2a2520]/90 backdrop-blur-lg sticky top-0 z-50">
+      <header className="border-b border-[#3A7D44]/30 bg-[#1a1612]/95 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href={`/org/${orgId}/dashboard`} className="flex items-center gap-3">

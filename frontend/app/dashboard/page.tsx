@@ -162,16 +162,16 @@ export default function DashboardPage() {
         <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-[#A8D5BA]/30 rounded-full blur-3xl" />
       </div>
 
-      {/* Dashboard content */}
-      <div className="flex flex-col md:flex-row">
-        {/* Sidebar */}
-        <div className="md:w-64 md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 bg-[#2a2520]">
-          <DesktopSidebar />
-        </div>
-        {/* Main content */}
-        <div className="flex-1 ml-0 md:ml-20 lg:ml-72 transition-all duration-300">
-          <div className="p-4">
-            <h1 className="text-3xl font-bold text-white mb-4">Dashboard</h1>
+      <DesktopSidebar />
+
+      {/* Main content */}
+      <div className="md:ml-20 lg:ml-72 relative z-10 transition-all duration-300">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-7xl">
+          {/* Header with user greeting */}
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl font-black text-[#F4FCE7] mb-2">Dashboard</h1>
+            <p className="text-[#A8D5BA]/70">Welcome back, {session?.user?.name?.split(' ')[0] || 'there'}! 🌱</p>
+          </div>
             
             {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -196,8 +196,9 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* Commitment Cards */}
-            <h2 className="text-2xl font-bold text-white mb-4">Your Commitments</h2>
+          {/* Commitment Cards */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-[#F4FCE7] mb-4">Your Commitments</h2>
             {commitments.length === 0 ? (
               <Card className="p-8 text-center bg-gradient-to-br from-[#1a1612]/80 to-[#2a2520]/80 backdrop-blur-xl border-[#3A7D44]/30">
                 <Leaf className="w-16 h-16 mx-auto mb-4 text-[#A8D5BA]" />
@@ -233,10 +234,12 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Badges Section */}
-            {userStats?.badges && userStats.badges.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-2xl font-bold text-white mb-4">Your Badges</h2>
+          </div>
+
+          {/* Badges Section */}
+          {userStats?.badges && userStats.badges.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-[#F4FCE7] mb-4">Your Badges</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {userStats.badges.map((badge: string, index: number) => (
                     <BadgeDisplay
@@ -245,10 +248,9 @@ export default function DashboardPage() {
                       level={index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze'}
                     />
                   ))}
-                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
