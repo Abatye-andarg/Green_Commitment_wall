@@ -168,14 +168,14 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-5 justify-center items-center animate-fade-in-up delay-400 px-4">
-              <Link href="/auth/register" className="w-full sm:w-auto">
+              <Link href="/auth/register?type=user" className="w-full sm:w-auto">
                 <Button size="lg" className="group w-full sm:w-auto bg-[#3A7D44] hover:bg-[#3A7D44]/90 text-white font-bold shadow-2xl shadow-[#3A7D44]/50 px-10 py-7 text-lg rounded-2xl transition-all duration-300 hover:shadow-3xl hover:shadow-[#3A7D44]/60 hover:scale-110 border-2 border-[#A8D5BA]/30">
                   <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
                   Start Your Journey
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/auth/login" className="w-full sm:w-auto">
+              <Link href="/auth/login?type=user" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto bg-[#F4FCE7]/10 backdrop-blur-sm border-2 border-[#F4FCE7]/30 text-[#F4FCE7] hover:bg-[#F4FCE7]/20 hover:border-[#F4FCE7]/50 font-bold px-10 py-7 text-lg rounded-2xl transition-all duration-300 hover:scale-105">
                   Sign In
                 </Button>
